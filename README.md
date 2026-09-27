@@ -1,65 +1,74 @@
 # CAGI-ED
 
-**Explainable Early Detection of Cross-Chain DeFi Laundering from Temporal Motifs** — phát hiện sớm hoạt động rửa tiền DeFi xuyên chuỗi từ *prefix* (đoạn đầu) của quỹ đạo giao dịch, trước khi tiền tới điểm đến cuối cùng.
-
-## Bối cảnh & đóng góp
-
-Các hệ thống truy vết rửa tiền DeFi hiện có (ví dụ AMLGuard, ISSTA'26) tập trung **trace toàn bộ quỹ đạo** từ seed đã biết đến điểm đến cuối cùng — tức chỉ hoạt động *sau khi* đã biết điểm đến. CAGI-ED chuyển trọng tâm sang bài toán **cảnh báo sớm**: chỉ quan sát một **phần đầu (prefix)** của quỹ đạo — trước khi điểm đến được xác nhận — và dự đoán mức độ rủi ro dựa trên các *typed temporal motif* (mô-típ hành vi có kiểu, theo thời gian: bridge→swap, split/merge, peel-chain...). Ground truth do nhóm **tự trace và tự gán** từ dữ liệu on-chain công khai, đối chiếu báo cáo điều tra công khai độc lập — không sao chép nhãn từ bất kỳ dataset độc quyền nào.
-
-## Kết quả chính
-
-**RQ1 — M1 (typed temporal motif) có vượt B3 (untyped/flat) không?**
-Leave-one-incident-out, 15 fold, bootstrap CI 95% mức incident:
-
-| Model | Mean PR-AUC |
-|---|---|
-| B3 (untyped/flat) | 0.6875 |
-| M1 (typed motif) | 0.6911 | 
-
-**RQ2 — Model có phát hiện được sớm (từ prefix) không?**
-Mean PR-AUC (15 fold) theo % quỹ đạo đã quan sát:
-
-| Mốc prefix | 25% | 50% | 75% | 100% |
-|---|---|---|---|---|
-| Mean PR-AUC | 0.9333 | 0.8491 | 0.9350 | 0.9407 |
-
-→ Phát hiện tốt ngay ở 25% quỹ đạo đầu tiên (PR-AUC 0.93), xác nhận tính khả thi của early detection.
-
-Ngoài ra: RQ3 (next-event prediction) không đạt data gate nên đã loại khỏi phạm vi chính thức; RQ4 xác nhận hiệu năng model CPU-only, latency dưới 30ms/trajectory kể cả ở độ dài lớn; đã bổ sung ablation (temporal/motif/bridge-context) và calibration xác suất.
-
-## Cấu trúc dataset (freeze v2.0, 2026-08-28)
-
-| | Giá trị |
-|---|---|
-| Incident positive | 15 (2021–2025, báo cáo công khai CertiK/SlowMist/Halborn/Chainalysis...) |
-| Hard-negative dùng được | 612 (500 mining chính + 107 mining bổ sung + 5 control gốc) |
-| Tổng prefix row | 3.354 |
-| Chain | Ethereum, BSC, Arbitrum |
-| Bridge family đã verify | 8 (Ronin Bridge, QBridge, FEG SmartBridge, Multichain, BSC Token Hub, LI.FI Diamond, Stargate, Across Protocol SpokePool) |
+**Early detection of cross-chain DeFi laundering from trajectory prefixes.**
+CAGI-ED theo dõi một địa chỉ seed sau vụ exploit, decode mỗi giao dịch mới
+thành một hành động có kiểu (transfer, swap, bridge, lending, split, merge,
+mixer/exit), mở rộng dòng tiền bị đánh dấu (tainted value flow) và chấm điểm
+lại *prefix* của trajectory sau mỗi hành động. Mục tiêu là cảnh báo **trước**
+khi tiền tới điểm thoát (bridge, mixer, lending) — khác với các hệ thống truy
+vết chỉ tái dựng dòng tiền sau khi mọi thứ đã xong.
 
 ## Cấu trúc repo
 
 ```
-cagi-ed/
-├── src/            # Pipeline chính: collect → normalize → trajectories → features → models → evaluation
-├── configs/        # Cấu hình model/feature/data (model.yaml, features.yaml, data.yaml)
-├── metadata/       # incident_registry.csv, hard_negative_registry*.csv, protocol_map.yaml, split_manifest.json
-├── data/           # Dataset đã xử lý (raw cache không commit — quá lớn)
-├── results/        # tables/, figures/, reports/ — toàn bộ số liệu/hình/báo cáo đã freeze
-├── tests/          # 197 test (pytest tests/ -v)
-├── scripts/        # Script tái tạo/mining/đánh giá (reproduce_main.sh là điểm bắt đầu)
+src/
+  collect/        Etherscan V2 (eth, arbitrum) + NodeReal (bsc) client, hard-negative miner
+  normalize/      decoder -> CanonicalEvent có kiểu, protocol map đã verify
+  trajectories/   bounded value-flow builder
+  pipeline/       collect -> decode -> build cho 1 incident; dataset_builder
+  features/       37 feature prefix-safe (flat / typed action / motif)
+  models/         B0-B3, B3', M1 (XGBoost), S1 (GRU)
+  evaluation/     LOIO + calibration + bootstrap mức incident (loio.py)
+  synth/          CAGI-Synth: bộ sinh dữ liệu TỔNG HỢP (báo cáo tách riêng)
+scripts/
+  crawl_all.py        crawl lại toàn bộ data/raw từ API (resume được)
+  run_experiments.py  MỌI số liệu trong paper, 1 lần chạy
+  make_figures.py     hình fig2a ... fig7b
+  reproduce_main.sh   chạy lại toàn bộ
+  mining/             script mining hard-negative (lịch sử)
+metadata/         incident_registry.csv, hard_negative_registry*.csv, protocol_map.yaml, split_manifest.json
+data/
+  raw_archive/        toàn bộ cache API (tar.xz, 84 MB, giải nén ra 1.5 GB)
+  processed/trajectories_v3.jsonl.gz   408 trajectory đã decode dùng trong paper
+  processed/original_trace/            trace decode từ lần crawl gốc (fallback)
+results/tables/   toàn bộ bảng số liệu (CSV/JSON) + run_manifest.json
+paper/            LaTeX (LNCS), figures/, sections/
+tests/            pytest (196 test)
 ```
 
-## Cách chạy / tái lập
+## Tái lập
 
 ```bash
-pip install -r requirements.lock   # version chính xác đã dùng để tạo kết quả freeze
-bash scripts/reproduce_main.sh     # tái tạo toàn bộ RQ1/RQ2/ablation/calibration — HOÀN TOÀN OFFLINE
-python -m pytest tests/ -v         # xác nhận 197/197 test pass
+pip install -r requirements.lock
+bash scripts/reproduce_main.sh          # từ trajectories_v3.jsonl.gz, không cần API
+bash scripts/reproduce_main.sh --raw    # từ data/raw (giải nén data/raw_archive trước)
+python -m pytest tests/ -q
+cd paper && latexmk -pdf cagi_nss2026.tex
 ```
 
-**Không cần gọi API on-chain nào** để tái lập kết quả từ dữ liệu đã cache sẵn. Yêu cầu API key chỉ cần nếu muốn thu thập dữ liệu mới từ đầu — không cần cho việc tái lập số liệu đã công bố.
+Crawl lại từ đầu (cần `ETHERSCAN_API_KEY`, `BSCTRACE_API_KEY` trong môi trường):
 
-## Nguồn dữ liệu & đạo đức
+```bash
+python scripts/crawl_all.py --chains eth arbitrum
+python scripts/crawl_all.py --chains bsc
+```
 
-Toàn bộ dữ liệu on-chain **công khai** (Ethereum/BSC/Arbitrum, qua Etherscan/BscScan API). Nhãn do nhóm **tự trace và tự gán**, đối chiếu báo cáo điều tra công khai (CertiK, SlowMist, Halborn...). **Không dùng ground truth AMLGuard** — dataset của họ chưa công khai tại thời điểm dự án bắt đầu (README AMLGuard ghi "release upon acceptance"); chỉ tham khảo seed list của họ (tên/chain/thời gian) làm gợi ý candidate ban đầu. Không deanonymize danh tính ngoài đời của bất kỳ ai.
+## Dữ liệu
+
+* 15 incident cross-chain công khai (2021–2025; 8 BSC, 5 Arbitrum, 2 Ethereum).
+  Nhãn do nhóm tự trace và đối chiếu với báo cáo công khai (CertiK, SlowMist,
+  PeckShield, Chainalysis, ...). Danh sách 82 case của AMLGuard chỉ dùng để
+  tìm ứng viên, không dùng ground truth của họ.
+* 393 hard negative: counterparty của CÙNG bridge/DEX/mixer trong ±7 ngày,
+  mở rộng với CÙNG collector/builder/độ sâu như incident.
+* Quota NodeReal miễn phí hết giữa chừng: 223/272 negative BSC có cache chưa
+  đủ bị loại; Paraluni dựng lại từ trace decode gốc. Chi tiết từng
+  trajectory: `results/tables/dataset_provenance.json`.
+* **CAGI-Synth** (`src/synth/`) là dữ liệu tổng hợp, chỉ dùng cho benchmark
+  độ khó riêng, KHÔNG trộn vào kết quả trên dữ liệu thật.
+
+## Đạo đức
+
+Chỉ dùng dữ liệu on-chain công khai và nhãn từ báo cáo công khai; không
+deanonymize danh tính thật của bất kỳ ai. Cảnh báo được thiết kế cho người
+phân tích xem xét, không phải để tự động phong toả.

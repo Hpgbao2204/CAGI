@@ -1,0 +1,8 @@
+{
+ "n_transitions": 11313,
+ "c1_ge_1000": true,
+ "min_class_count": 4,
+ "c2_all_classes_ge_30": false,
+ "majority_ratio": 0.670467603641828,
+ "c3_majority_lt_60": false
+}

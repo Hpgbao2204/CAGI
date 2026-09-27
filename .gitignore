@@ -8,3 +8,19 @@ data/raw/*
 .DS_Store
 .claude/
 .git.backup/
+# LaTeX build
+paper/*.aux
+paper/*.log
+paper/*.bbl
+paper/*.blg
+paper/*.out
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+# crawl/experiment intermediates
+data/processed/exp/
+experiments/logs/crawl_*.log
+paper/*.pdf
+!paper/figures/*.pdf
+experiments/logs/run_experiments.log
+experiments/logs/synth.log

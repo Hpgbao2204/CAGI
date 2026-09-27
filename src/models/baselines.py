@@ -344,6 +344,39 @@ class M1TypedTemporalMotifModel:
         return self.model.predict_proba(Xb)[:, 1]
 
 
+# Nhom feature dung cho nghien cuu bieu dien co kiem soat (Todo T3/T19):
+# CUNG learner (XGBoost, hyperparameter cua M1), chi doi tap feature.
+FLAT_FEATURES = tuple(B3FlatGraphRandomForest.FLAT_UNTYPED_FEATURES)
+TYPED_ACTION_FEATURES = (
+    "action_count_transfer_ratio", "action_count_bridge_deposit_ratio", "action_count_bridge_withdraw_ratio",
+    "action_count_lending_deposit_ratio", "action_count_lending_withdraw_ratio", "action_count_swap_ratio",
+    "action_count_split_ratio", "action_count_merge_ratio", "action_count_mixer_or_exit_ratio",
+    "action_count_other_ratio", "num_distinct_bigrams", "num_distinct_trigrams", "num_bridge_families",
+    "swap_after_bridge", "stablecoin_pivot", "time_to_first_bridge",
+)
+MOTIF_FEATURES = (
+    "motif_split", "motif_merge", "motif_peel_like_chain", "motif_bridge_then_swap",
+    "motif_swap_then_split", "motif_nested_bridge", "motif_rapid_token_pivot",
+)
+TEMPORAL_FEATURES = (
+    "time_to_first_bridge", "inter_action_gap_mean", "inter_action_gap_std", "burstiness", "active_duration_sec",
+)
+
+
+class XGBFeatureSubsetModel(M1TypedTemporalMotifModel):
+    """XGBoost voi DUNG hyperparameter, coverage filter va scale_pos_weight
+    cua M1, nhung chi dung `columns`. B3' = XGBFeatureSubsetModel(FLAT_FEATURES)."""
+
+    name = "xgb_feature_subset"
+
+    def __init__(self, columns: Sequence[str], **model_kwargs) -> None:
+        super().__init__(include_bridge_context=True, **model_kwargs)
+        self.columns = tuple(columns)
+
+    def _candidate_columns(self, X: pd.DataFrame) -> List[str]:
+        return [c for c in self.columns if c in X.columns]
+
+
 def get_all_baselines() -> Dict[str, BaselineModel]:
     """Registry tiện dùng trong evaluation — khớp configs/model.yaml."""
     return {

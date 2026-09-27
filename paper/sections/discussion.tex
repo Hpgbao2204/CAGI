@@ -1,0 +1,46 @@
+%=============================================================================
+\section{Discussion}
+\label{sec:discussion}
+%=============================================================================
+
+\paragraph{What the evidence supports.}
+Early warning on real cross-chain incidents is feasible but hard.
+A calibrated detector alerts on 12 of 15 incidents at a 5.8\% per-trajectory false-alert rate on hard negatives drawn from the same bridges and DEXs, and in three of the six incidents where an early alert is possible at all it fires 5 to 114 minutes before the exit.
+The typed representation earns its keep in the first minute of a flow, where it doubles PR-AUC over the same learner on flat features; once a flow has a few dozen actions, amounts, tempo and hop structure carry the signal and typing adds nothing measurable at $N=15$.
+Rule-based typology scores, the natural first tool of a compliance team, are far weaker than any learned detector.
+We therefore see the main value of typing in the \emph{earliest} alert and in its explanation: an analyst receives ``large amount, swap then fan-out within three minutes (ADT3028.003 Layering)'' rather than an opaque score.
+
+\paragraph{What changed from our earlier analysis.}
+Re-building the pipeline for this paper exposed three problems in our own earlier version, and we report them because they are easy to repeat.
+(i) A relative-position feature $k/n$ leaked the final trajectory length into every prefix.
+(ii) Incidents were expanded six hops and negatives two, so hop depth and length separated the classes by construction.
+(iii) A feature group was dropped after inspecting ablations on all incidents.
+Together with the re-collected data, correcting them lowered the typed model's pooled PR-AUC from 0.736 in our earlier draft to the 0.479 reported here.
+The unit test that compares prefixes of trajectories with different futures, uniform expansion for all trajectories, and nested selection now guard against these errors.
+
+\paragraph{Limitations and threats to validity.}
+\emph{Sample size.} Fifteen incidents give wide intervals; most group-level differences are not significant, and the two significant early-horizon results do not survive a Bonferroni correction over eight horizons.
+\emph{Incomplete BSC negatives.} The free NodeReal quota ran out, so BSC incidents have fewer negatives (0 to 23) than Ethereum and Arbitrum incidents (24 to 75), two incidents have none, and one incident is rebuilt from an earlier trace.
+\emph{Selection bias.} Incidents come from public reports, which over-represent large, well-investigated thefts; the strong role of amount features partly reflects this.
+\emph{Scope.} Traces follow one chain to two expansion rounds; bridge exits are endpoints rather than stitched continuations, and non-EVM chains need new decoders.
+\emph{Endpoint definition.} We use the first exit action in the trace; for four incidents this is the first action, and for two incidents the reported exit lies outside the traced depth.
+\emph{Adaptive adversaries.} Cheap decoy transfers reduce detection from 80\% to 60--67\%; an attacker who also imitates benign tempo and amounts was not evaluated, and our synthetic generator shows that hand-written typologies do not reproduce the difficulty of real data.
+\emph{Offline replay.} Detection is evaluated by replaying cached data in time order, not on a live stream.
+
+\paragraph{Ethics.}
+CAGI-ED uses public on-chain data and labels from public reports only.
+It performs no de-anonymization beyond those sources and uses no exchange or proprietary labels.
+Alerts are calibrated, explained signals for human review under AML obligations for virtual-asset service providers~\cite{fatf2022targeted}, not automatic enforcement, because a false alert affects a legitimate user.
+
+\paragraph{Availability.}
+The incident and negative registries, the raw API responses with checksums, the decoded trajectories, all per-incident results and the scripts that regenerate every number and figure from one command are available at \TBD{anonymous artifact URL}.
+
+%=============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+%=============================================================================
+
+We framed cross-chain laundering analysis as early detection on trajectory prefixes and built CAGI-ED, a CPU-only pipeline from explorer APIs to calibrated, explained alerts.
+On 15 real incidents with 393 hard negatives from the same protocols, it alerts on most incidents at a low false-alert rate and, where the flow leaves time, minutes to hours before the exit.
+Typing each action by its DeFi semantics helps most at the very first steps of a flow and in explaining alerts, while amount, tempo and hop structure dominate later; a rule-based typology score is not a substitute for either.
+A larger set of incidents with complete negatives is the most important next step, followed by stitching bridge continuations across chains, evaluating against adaptive adversaries on a live stream, and revisiting next-action forecasting once enough labeled exits exist.

@@ -1,0 +1,52 @@
+%=============================================================================
+\section{Related Work}
+\label{sec:related}
+%=============================================================================
+
+\paragraph{Cross-chain tracing and bridge security.}
+Surveys describe the diversity of cross-chain protocols~\cite{robinson2021survey,ou2022overview}, and Lee et al.\ systematize bridge hacks and their losses~\cite{lee2023sok}.
+Xscope checks cross-chain invariants to find bridge attacks~\cite{zhang2022xscope}, SmartAxe finds vulnerabilities in bridge contracts by static analysis~\cite{liao2024smartaxe}, XChainWatcher monitors bridges with Datalog rules~\cite{augusto2025xchainwatcher}, and BridgeGuard characterizes and detects attack transactions~\cite{wu2025safeguarding}.
+These systems protect the bridge itself; CAGI-ED starts after the exploit and follows the stolen value.
+For tracing, Yan et al.\ match Ethereum--Polygon transfers~\cite{yan2025tracing}, CONNECTOR automates deposit--withdrawal association~\cite{lin2025connector}, and ABCTracer generalizes it to bidirectional tracing across 12 bridges~\cite{lin2025abctracer}.
+Their output, a matched pair of transactions, is an input that CAGI-ED could consume to continue a trajectory on the destination chain.
+
+\paragraph{Laundering detection on account-based chains.}
+DenseFlow finds laundering accounts in Ethereum by locating dense value flows~\cite{lin2024denseflow}, and address-clustering heuristics link accounts controlled by the same entity~\cite{victor2020clustering}.
+AMLGuard is closest to our work: it parses transactions into DeFi semantic units and uses retrieval-augmented reasoning to reconstruct a compact illicit-flow topology across chains~\cite{wu2026amlguard}.
+CAGI-ED differs in its task and its output.
+It scores \emph{partial} trajectories and outputs a \emph{calibrated} probability, an alert time and its evidence, not a topology; it runs on a CPU without a language model; and it is evaluated against hard negatives that use the same protocols.
+The two are complementary: AMLGuard-style reconstruction can supply seeds and labels, and CAGI-ED can monitor new incidents before reconstruction is possible.
+
+\paragraph{Graph learning for illicit activity.}
+Graph convolutional networks on the Elliptic dataset~\cite{weber2019elliptic}, Elliptic++~\cite{elmougy2023ellipticpp} and the subgraph-level Elliptic2~\cite{bellei2024elliptic2} established graph learning for Bitcoin anti-money laundering.
+Multi-relational~\cite{hyun2023aml}, temporal~\cite{alarab2023graphlstm,patel2022evangcn} and sequence-pretrained~\cite{li2022ttagn,hu2023bert4eth} models extend it to Ethereum phishing and fraud, and temporal graph networks give a general dynamic-graph backbone~\cite{rossi2020tgn}.
+These methods need thousands of labeled nodes or subgraphs on one ledger and score complete histories.
+With 15 incidents we deliberately use a small, interpretable tree ensemble and report where the evidence is and is not conclusive.
+
+\paragraph{Early classification.}
+Early classification of time series trades accuracy for earliness by deciding on a prefix~\cite{xing2012early,gupta2020early}.
+We adopt its prefix view but measure earliness against a domain event, the laundering endpoint, and report false alerts per benign trajectory because every alert costs an analyst's time.
+
+Table~\ref{tab:positioning} summarizes the closest systems.
+
+\begin{table}[t]
+\centering
+\caption{Positioning against the closest systems. ``Laund.\ path'': models multi-step post-exploit flows; ``Prefix'': emits a decision before the flow completes; ``Calib.'': outputs a calibrated probability.}
+\label{tab:positioning}
+\setlength{\tabcolsep}{3pt}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}llp{2.9cm}ccccp{1.5cm}@{}}
+\toprule
+System & Year & Primary task & X-chain & Laund. path & Prefix & Calib. & Evidence \\
+\midrule
+DenseFlow~\cite{lin2024denseflow} & 2024 & Laundering accounts & No & Yes & No & No & Flow subgraph \\
+CONNECTOR~\cite{lin2025connector} & 2025 & Bridge tx association & Yes & No & No & No & Matched pair \\
+ABCTracer~\cite{lin2025abctracer} & 2025 & Bidirectional tracing & Yes & No & No & No & Matched pair \\
+BridgeGuard~\cite{wu2025safeguarding} & 2025 & Bridge attack tx detection & Yes & No & No & No & -- \\
+XChainWatcher~\cite{augusto2025xchainwatcher} & 2025 & Bridge anomaly rules & Yes & No & Online & No & Violated rule \\
+AMLGuard~\cite{wu2026amlguard} & 2026 & LLM-aided laundering tracing & Yes & Yes & No & No & Flow topology \\
+\textbf{CAGI-ED} & -- & Early laundering alert & Yes & Yes & Yes & Yes & SHAP + AADAPT \\
+\bottomrule
+\end{tabular}}
+\end{table}

@@ -1,0 +1,16 @@
+incident,chain,bridge_families_observed,mixer_observed,M1_pr_auc,B3p_pr_auc,before_endpoint_0.5
+bsc_token_hub_2022,bsc,none,False,0.5894957983193277,0.4352905366692131,False
+chibi_finance_2023,arbitrum,Multichain (AnySwap) Router V6;Stargate (LayerZero),False,1.0,0.9704861111111112,True
+deltaprime_arbitrum_2024,arbitrum,Across Protocol SpokePool (Arbitrum),False,0.1980805464374777,0.2690188210911894,True
+feg_bridge_2024,eth,none,True,1.0,0.2173949579831933,
+hackerdao_2022,bsc,none,True,,,
+magic_abracadabra_arbitrum_2025,arbitrum,LI.FI Diamond,False,0.1353870620729173,0.0958266688514426,False
+new_free_dao_2022,bsc,none,True,,,False
+paraluni_2022,bsc,none,False,0.8628787878787878,0.9519230769230768,
+qbridge_qubit_2022,bsc,none,False,0.8860479797979799,0.8951388888888889,
+radiant_capital_arbitrum_2024,arbitrum,LI.FI Diamond,False,0.8328754578754579,0.8075727513227513,True
+ronin_bridge_2022,eth,none,False,0.1896335879567587,0.2689303053757388,
+utopiasphere_2024,bsc,LI.FI Diamond,False,1.0,1.0,
+wault_finance_2021,bsc,none,False,0.7177083333333333,0.7684324447482342,
+wooppv2_2024,arbitrum,Stargate (LayerZero),False,0.790521978021978,0.4786594699058711,False
+xkingdom_2024,arbitrum,Across Protocol SpokePool (Arbitrum);Stargate (LayerZero),False,1.0,1.0,False

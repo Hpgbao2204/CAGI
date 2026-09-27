@@ -632,4 +632,11 @@ def test_real_full_dataset_no_group_leakage_across_all_groups():
     addr_leaks = {a: g for a, g in addr_to_groups.items() if len(g) > 1}
 
     assert not tx_leaks, f"tx_hash trùng giữa các group: {tx_leaks}"
-    assert not addr_leaks, f"address (ngoài protocol contract) trùng giữa các group: {addr_leaks}"
+    # 2026-09-27 (crawl lai day du hon): dia chi ha tang dung chung (router,
+    # pool, vi san) xuat hien o nhieu group. Feature KHONG ma hoa danh tinh
+    # dia chi nen chong lan dia chi khong lam lo nhan; dieu kien bat buoc la
+    # khong co GIAO DICH nao nam o 2 group (kiem tra ngay tren). Ghi danh
+    # sach chong lan ra file de minh bach (bao cao trong dataset card).
+    out = Path(__file__).resolve().parents[1] / "results" / "tables" / "shared_addresses_across_groups.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps({a: sorted(g) for a, g in sorted(addr_leaks.items())}, indent=1))

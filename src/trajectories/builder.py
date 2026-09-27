@@ -39,6 +39,7 @@ class TrajectoryConfig:
     dex_allowlist: Tuple[str, ...] = ()
     mixer_allowlist: Tuple[str, ...] = ()
     lending_allowlist: Tuple[str, ...] = ()
+    expand_iterations: int = 2
 
     @property
     def allowlist(self) -> set:
@@ -69,6 +70,7 @@ def load_trajectory_config(path: Path = DEFAULT_DATA_CONFIG_PATH) -> TrajectoryC
         dex_allowlist=tuple(raw.get("dex_allowlist") or ()),
         mixer_allowlist=tuple(raw.get("mixer_allowlist") or ()),
         lending_allowlist=tuple(raw.get("lending_allowlist") or ()),
+        expand_iterations=int(traj.get("expand_iterations", 2)),
     )
 
 

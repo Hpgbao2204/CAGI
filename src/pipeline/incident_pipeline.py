@@ -138,6 +138,26 @@ def _load_cached_bsctrace_rows(address: str, incident_id: str) -> List[dict]:
     return rows
 
 
+def address_cache_complete(chain: str, address: str, incident_id: str) -> bool:
+    """Cache cua 1 dia chi (scope incident_id) da DAY DU chua.
+    bsc: trang inbound cuoi (w1000+) khong con pageKey (hoac cham tran 100
+    trang — cung gioi han voi BscTraceClient). eth/arbitrum: da co file
+    txlistinternal (loai goi CUOI CUNG trong collect_address_raw_data)."""
+    d = RAW_DIR / chain / address.lower() / incident_id
+    if not d.exists():
+        return False
+    if chain in BSC_CHAINS:
+        inbound = [f for f in d.glob("assettransfers_w*.json") if int(f.stem.split("_w")[1]) >= 1000]
+        if not inbound:
+            return False
+        if len(inbound) >= 100:
+            return True
+        last = max(inbound, key=lambda f: int(f.stem.split("_w")[1]))
+        res = json.loads(last.read_text(encoding="utf-8"))["response"].get("result") or {}
+        return not res.get("pageKey") or not res.get("transfers")
+    return any(d.glob("txlistinternal_w*.json"))
+
+
 # BSCTrace (MegaNode) dùng cho BSC vì Etherscan free-tier không hỗ trợ
 # (xem src/collect/bsctrace_client.py). Client type khác nhau -> dispatch
 # theo chain ở collect_address_raw_data/load_events_for_addresses.
@@ -296,6 +316,7 @@ def expand_and_build_trajectory(
     max_iterations: Optional[int] = None,
     client: Optional[object] = None,
     request_delay_sec: float = 0.4,
+    collect_workers: int = 1,
 ) -> Tuple[Trajectory, List[CanonicalEvent], List[str]]:
     """Lặp: fetch (nếu do_collect) -> decode -> build_trajectory -> lấy dst
     của action được chấp nhận làm frontier kế tiếp -> lặp tới khi hội tụ.
@@ -308,7 +329,7 @@ def expand_and_build_trajectory(
     if config is None:
         config = load_trajectory_config()
     if max_iterations is None:
-        max_iterations = config.max_depth
+        max_iterations = config.expand_iterations
     if client is None and do_collect:
         client = BscTraceClient(cache_dir=RAW_DIR) if chain in BSC_CHAINS else EtherscanClient(cache_dir=RAW_DIR)
 
@@ -329,8 +350,15 @@ def expand_and_build_trajectory(
         to_fetch = [a for a in frontier if a not in processed_set]
         if not to_fetch:
             break
+        if do_collect and collect_workers > 1 and len(to_fetch) > 1:
+            # Chi song song hoa buoc GOI API (moi dia chi 1 thu muc cache
+            # rieng); thu tu `processed` van giu nguyen thu tu frontier.
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=collect_workers) as pool:
+                list(pool.map(lambda a: collect_address_raw_data(client, chain, a, incident_id, start_block, end_block),
+                              to_fetch))
         for addr in to_fetch:
-            if do_collect:
+            if do_collect and not (collect_workers > 1 and len(to_fetch) > 1):
                 collect_address_raw_data(client, chain, addr, incident_id, start_block, end_block)
                 time.sleep(request_delay_sec)
             processed.append(addr)
