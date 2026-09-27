@@ -13,6 +13,8 @@ if [[ "${1:-}" == "--raw" ]]; then
 else
   "$PY" scripts/run_experiments.py --stage dataset --from-export
 fi
-"$PY" scripts/run_experiments.py --stage rq1 seq rq2 rq2paired calib explain stress builder synth gate runtime
+"$PY" scripts/run_experiments.py --stage rq1 seq rq2 rq2paired calib explain stress synth gate runtime
+# builder sensitivity rebuilds trajectories with other settings: needs data/raw
+if [[ -d data/raw/eth ]]; then "$PY" scripts/run_experiments.py --stage builder; fi
 "$PY" scripts/make_figures.py
 echo "Done: results/tables/*, paper/figures/fig*.pdf (runtime.csv depends on the hardware)."
