@@ -1,8 +1,0 @@
-incident_id,te,te_action_type,trajectory_len,alert_prefix_len,alert_prefix_bucket,alert_ta,lead_time_sec,lead_steps,detected_before_endpoint,never_alerted
-feg_bridge_2024,2024-12-29 05:57:23+00:00,mixer_or_exit,9,,,,,,,True
-deltaprime_arbitrum_2024,2024-11-11 10:15:14+00:00,bridge_deposit,5,4.0,ratio_75,2024-11-11 08:54:48+00:00,4826.0,1.0,True,False
-bsc_token_hub_2022,2022-10-06 15:19:57+00:00,lending_deposit,74,37.0,ratio_50,2022-10-08 10:51:49+00:00,-156712.0,37.0,False,False
-chibi_finance_2023,2023-06-27 07:47:58+00:00,bridge_deposit,16,7.0,k_7,2023-06-27 07:47:58+00:00,0.0,9.0,False,False
-wooppv2_2024,2024-03-05 16:08:05+00:00,bridge_deposit,6,,,,,,,True
-utopiasphere_2024,2024-07-21 11:53:41+00:00,bridge_deposit,17,5.0,ratio_25,2024-07-21 11:14:33+00:00,2348.0,12.0,True,False
-xkingdom_2024,2024-01-06 16:29:33+00:00,bridge_deposit,13,7.0,ratio_50,2024-01-06 21:14:49+00:00,-17116.0,6.0,False,False
