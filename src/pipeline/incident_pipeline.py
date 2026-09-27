@@ -138,6 +138,26 @@ def _load_cached_bsctrace_rows(address: str, incident_id: str) -> List[dict]:
     return rows
 
 
+def address_cache_complete(chain: str, address: str, incident_id: str) -> bool:
+    """Cache cua 1 dia chi (scope incident_id) da DAY DU chua.
+    bsc: trang inbound cuoi (w1000+) khong con pageKey (hoac cham tran 100
+    trang — cung gioi han voi BscTraceClient). eth/arbitrum: da co file
+    txlistinternal (loai goi CUOI CUNG trong collect_address_raw_data)."""
+    d = RAW_DIR / chain / address.lower() / incident_id
+    if not d.exists():
+        return False
+    if chain in BSC_CHAINS:
+        inbound = [f for f in d.glob("assettransfers_w*.json") if int(f.stem.split("_w")[1]) >= 1000]
+        if not inbound:
+            return False
+        if len(inbound) >= 100:
+            return True
+        last = max(inbound, key=lambda f: int(f.stem.split("_w")[1]))
+        res = json.loads(last.read_text(encoding="utf-8"))["response"].get("result") or {}
+        return not res.get("pageKey") or not res.get("transfers")
+    return any(d.glob("txlistinternal_w*.json"))
+
+
 # BSCTrace (MegaNode) dùng cho BSC vì Etherscan free-tier không hỗ trợ
 # (xem src/collect/bsctrace_client.py). Client type khác nhau -> dispatch
 # theo chain ở collect_address_raw_data/load_events_for_addresses.
@@ -309,7 +329,7 @@ def expand_and_build_trajectory(
     if config is None:
         config = load_trajectory_config()
     if max_iterations is None:
-        max_iterations = config.max_depth
+        max_iterations = config.expand_iterations
     if client is None and do_collect:
         client = BscTraceClient(cache_dir=RAW_DIR) if chain in BSC_CHAINS else EtherscanClient(cache_dir=RAW_DIR)
 

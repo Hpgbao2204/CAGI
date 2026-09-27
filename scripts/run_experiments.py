@@ -160,8 +160,12 @@ def stage_dataset(from_export: bool = False):
         items = _import_trajectories()
     else:
         log("=== dataset: build trajectory tu data/raw (offline) ===")
-        items = load_rq1_trajectories(include_v2_complexity=True, verbose=False)
+        prov = {}
+        items = load_rq1_trajectories(include_v2_complexity=True, verbose=False, require_complete_cache=True,
+                                      provenance=prov)
         _export_trajectories(items)
+        TAB.mkdir(parents=True, exist_ok=True)
+        (TAB / "dataset_provenance.json").write_text(json.dumps(prov, indent=1, sort_keys=True))
     reg = pd.read_csv(REPO_ROOT / "metadata" / "incident_registry.csv").set_index("incident_id")
     trajs = []
     rows = []
@@ -644,10 +648,11 @@ def stage_builder():
     from dataclasses import replace
     base = load_trajectory_config()
     rows = []
-    for depth in (4, 6):
+    for depth in (1, 2):
         for share in (0.05, 0.10, 0.20):
-            cfg = replace(base, max_depth=depth, min_tainted_share=share)
-            items = load_rq1_trajectories(config=cfg, include_v2_complexity=True)
+            cfg = replace(base, min_tainted_share=share)
+            items = load_rq1_trajectories(config=cfg, include_v2_complexity=True, require_complete_cache=True,
+                                          max_iterations_positive=depth, max_iterations_negative=depth)
             rr = []
             for it in items:
                 for spec, feats in extract_all_prefixes(it.trajectory):
@@ -661,11 +666,55 @@ def stage_builder():
             rb = run_loio(subset(FLAT_FEATURES), d[fc], d.label, d.group_id)
             pos_len = [len(it.trajectory) for it in items if it.label == 1]
             b = bootstrap_metric(d.label, r.oof_raw, d.group_id)
-            rows.append({"max_depth": depth, "min_share": share, "n_rows": len(d),
+            rows.append({"expand_iterations": depth, "min_share": share, "n_rows": len(d),
                          "median_pos_len": float(np.median(pos_len)), "M1_pr_auc": b["point"],
                          "M1_ci_low": b["ci_low"], "M1_ci_high": b["ci_high"], "B3p_pr_auc": ap(d.label, rb.oof_raw)})
             log(rows[-1])
     write_csv(pd.DataFrame(rows), "builder_sensitivity.csv")
+
+
+# ----------------------------------------------------------------------
+# Stage: synth — benchmark TONG HOP (bao cao tach rieng khoi du lieu that)
+# ----------------------------------------------------------------------
+SYNTH_DIFFICULTY = (0.0, 0.25, 0.5, 0.75, 1.0)
+
+
+def _prefix_frame(items):
+    rows = []
+    for it in items:
+        for spec, feats in extract_all_prefixes(it.trajectory, include_endpoint_context=False):
+            feats = dict(feats)
+            feats.pop("prefix_len", None)
+            rows.append({"trajectory_id": it.trajectory.trajectory_id, "source_id": it.source_id,
+                         "group_id": it.group_id, "kind": it.kind, "chain": it.chain, "label": it.label,
+                         "prefix_label": spec.label, "prefix_len": spec.length,
+                         "trajectory_len": len(it.trajectory), **feats})
+    return pd.DataFrame(rows).fillna(0.0)
+
+
+def stage_synth():
+    log("=== synth (CAGI-Synth, du lieu TONG HOP) ===")
+    from src.synth.generator import generate
+    df_real, pool_real, feat_cols = load_pool()
+    real_model = XGBFeatureSubsetModel(FULL_FEATURES).fit(pool_real[feat_cols], pool_real["label"], pool_real["group_id"])
+    rows = []
+    for d in SYNTH_DIFFICULTY:
+        items = generate(n_incidents=30, negatives_per_incident=40, difficulty=d, seed=2026)
+        pool = dedupe_pooled_prefixes(_prefix_frame(items))
+        X = pool.reindex(columns=feat_cols, fill_value=0.0)
+        y, g = pool["label"], pool["group_id"]
+        r = {"difficulty": d, "n_traj": len(items), "n_rows": len(pool), "pos_rate": float(y.mean())}
+        for name, fac in (("M1", m1()), ("B3p", subset(FLAT_FEATURES)), ("B3", B3FlatGraphRandomForest),
+                          ("B1", B1RuleBasedTypologyScore)):
+            res = run_loio(fac, X, y, g)
+            b = bootstrap_metric(y, res.oof_raw, g)
+            r[f"{name}_pr_auc"], r[f"{name}_ci_low"], r[f"{name}_ci_high"] = b["point"], b["ci_low"], b["ci_high"]
+        tr = real_model.predict_proba(X)
+        b = bootstrap_metric(y, tr, g)
+        r["M1_real_to_synth_pr_auc"], r["M1_real_to_synth_ci_low"], r["M1_real_to_synth_ci_high"] = b["point"], b["ci_low"], b["ci_high"]
+        rows.append(r)
+        log({k: (round(v, 4) if isinstance(v, float) else v) for k, v in r.items()})
+    write_csv(pd.DataFrame(rows), "synth_benchmark.csv")
 
 
 # ----------------------------------------------------------------------
@@ -729,7 +778,7 @@ def stage_runtime():
 
 STAGES = {"dataset": stage_dataset, "rq1": stage_rq1, "seq": stage_seq, "rq2": stage_rq2, "calib": stage_calib,
           "explain": stage_explain, "stress": stage_stress, "builder": stage_builder,
-          "gate": stage_gate, "runtime": stage_runtime}
+          "synth": stage_synth, "gate": stage_gate, "runtime": stage_runtime}
 
 
 def main():

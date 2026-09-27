@@ -52,6 +52,12 @@ lending_allowlist:
 
 trajectory:
   max_depth: 6
+  # So vong mo rong frontier (fetch dia chi moi) — AP DUNG CHUNG cho incident
+  # va hard-negative (2026-09-27). Truoc day incident mo 6 vong, negative 2
+  # vong -> path_depth/do dai cua negative bi chan tren boi cach thu thap,
+  # tao duong tat cho model. 2 vong khop trace goc cua hau het incident
+  # (tests/fixtures/golden) va tranh no qua cac dia chi hub (WETH, router).
+  expand_iterations: 2
   time_horizon_hours: 72
   min_tainted_share: 0.05   # ngưỡng giữ outgoing branch (5% tainted inflow)
 

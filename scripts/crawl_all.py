@@ -56,7 +56,7 @@ def _address_cache_complete(chain: str, address: str, scope: str) -> bool:
             return True
         res = json.loads(inbound[-1].read_text())["response"].get("result") or {}
         return not res.get("pageKey") or not res.get("transfers")
-    return any(d.glob("txlistinternal_w*.json"))
+    return ip.address_cache_complete(chain, address, scope)
 
 
 def _collect_skip_complete(client, chain, address, incident_id, start_block, end_block):
@@ -67,7 +67,10 @@ def _collect_skip_complete(client, chain, address, incident_id, start_block, end
 
 ip.collect_address_raw_data = _collect_skip_complete
 
-MAX_ITERATIONS_NEGATIVE = 2  # khop dataset_builder.load_rq1_trajectories
+from src.trajectories.builder import load_trajectory_config  # noqa: E402
+
+# CUNG so vong mo rong cho moi trajectory (configs/data.yaml::expand_iterations)
+MAX_ITERATIONS = load_trajectory_config().expand_iterations
 
 
 class ThrottledCountingSession(requests.Session):
@@ -98,7 +101,7 @@ def build_jobs(chains):
         if r["chain_primary"] in chains:
             jobs.append(dict(job_id=r["incident_id"], chain=r["chain_primary"], seed=r["seed_address"],
                              start_block=int(r["start_block"]), scope=r["incident_id"],
-                             label=int(r["label"]), max_iterations=None))
+                             label=int(r["label"]), max_iterations=MAX_ITERATIONS))
     for path in (HARD_NEGATIVE_REGISTRY_PATH, HARD_NEGATIVE_REGISTRY_V2_COMPLEXITY_PATH):
         hn = pd.read_csv(path)
         hn = hn[~hn["parent_incident_id"].isin(AUXILIARY_INCIDENT_IDS)]
@@ -106,7 +109,7 @@ def build_jobs(chains):
             if r["chain"] in chains:
                 jobs.append(dict(job_id=r["hard_negative_id"], chain=r["chain"], seed=r["seed_address"],
                                  start_block=int(r["start_block"]), scope=r["parent_incident_id"],
-                                 label=0, max_iterations=MAX_ITERATIONS_NEGATIVE))
+                                 label=0, max_iterations=MAX_ITERATIONS))
     return jobs
 
 
