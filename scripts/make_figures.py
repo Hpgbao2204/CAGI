@@ -405,7 +405,7 @@ SHORT_NAME = {
 
 
 def appendix_table():
-    """paper/sections/appendix_incidents.tex tu metadata + results (truy vet duoc)."""
+    """Bang su co trong paper/cagi_nss2026.tex (giua 2 marker auto:incident-table) tu metadata + results."""
     import json
     reg = pd.read_csv(REPO_ROOT / "metadata" / "incident_registry.csv").set_index("incident_id")
     inc = csv("incident_table.csv").set_index("incident_id")
@@ -431,9 +431,13 @@ def appendix_table():
            "\\resizebox{\\linewidth}{!}{%\n\\begin{tabular}{@{}lllcrrlrp{3.0cm}@{}}\n\\toprule\n"
            "Incident & Start & Chain & Seed & $n$ & Hours & Endpoint ($e^\\star$) & Neg. & Public sources \\\\\n"
            "\\midrule\n" + body + "\n\\bottomrule\n\\end{tabular}}\n\\end{table}\n")
-    out = REPO_ROOT / "paper" / "sections" / "appendix_incidents.tex"
-    out.write_text(tex)
-    print("  ->", out.name)
+    out = REPO_ROOT / "paper" / "cagi_nss2026.tex"
+    begin, end = "% BEGIN auto:incident-table", "% END auto:incident-table"
+    paper = out.read_text()
+    i, j = paper.index(begin), paper.index(end)
+    i = paper.index("\n", i) + 1
+    out.write_text(paper[:i] + tex + paper[j:])
+    print("  ->", out.name, "(incident table)")
 
 
 def main():
