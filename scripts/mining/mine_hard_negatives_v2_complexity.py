@@ -38,7 +38,7 @@ from src.collect.hard_negative_miner import (
 from src.pipeline.incident_pipeline import REGISTRY_PATH, expand_and_build_trajectory
 from src.trajectories.builder import load_trajectory_config
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 OUT_PATH = REPO_ROOT / "metadata" / "hard_negative_registry_v2_complexity.csv"
 TARGET_PER_INCIDENT = 10
 MAX_CANDIDATES_CHECKED = 150

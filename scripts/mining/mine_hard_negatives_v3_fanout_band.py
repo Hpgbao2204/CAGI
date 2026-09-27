@@ -27,7 +27,7 @@ from src.collect.hard_negative_miner import (
 from src.normalize.decoder import build_verified_bridge_address_index, build_verified_mixer_address_index, load_protocol_map
 from src.pipeline.incident_pipeline import RAW_DIR, REGISTRY_PATH
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 HARD_NEGATIVE_REGISTRY_PATH = REPO_ROOT / "metadata" / "hard_negative_registry.csv"
 HN_V2_PATH = REPO_ROOT / "metadata" / "hard_negative_registry_v2_complexity.csv"
 FEATURES_V2_PATH = REPO_ROOT / "data" / "processed" / "features_v2.parquet"

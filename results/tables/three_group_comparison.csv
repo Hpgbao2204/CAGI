@@ -1,4 +1,0 @@
-group,n,mean_fan_out,pct_flagged_positive_at_0.5
-"matched_hard_negative (fan_out<=3, chinh thuc)",509,1.2868369351669942,0.0
-"unmatched_negative (E6, fan_out>3, danh tinh CHUA xac nhan)",460,2.6608695652173915,0.21739130434782608
-"high_fanout_benign_labeled (nhom moi, nhan cong khai xac nhan)",1,1.0,0.0

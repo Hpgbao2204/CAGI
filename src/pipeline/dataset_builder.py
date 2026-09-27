@@ -170,12 +170,12 @@ def load_rq1_trajectories(
 
 def _trajectory_from_decoded_trace(incident_id: str, row, config: TrajectoryConfig, max_iterations: int):
     """Fallback khi cache API khong day du (vd het quota NodeReal cho BSC):
-    dung trace DA DECODE tu lan crawl goc (data/processed/{id}_events.json,
+    dung trace DA DECODE tu lan crawl goc (data/processed/original_trace/,
     trung voi tests/fixtures/golden) va cat ve CUNG so hop voi cac trajectory
     khac: chay lai builder voi max_depth = max_iterations + 1 (nguon cua
     action phai nam trong <= max_iterations hop tu seed)."""
     from dataclasses import replace
-    path = PROCESSED_DIR / f"{incident_id}_events.json"
+    path = PROCESSED_DIR / "original_trace" / f"{incident_id}_events.json"
     if not path.exists():
         return None
     events = [CanonicalEvent(**e) for e in json.loads(path.read_text(encoding="utf-8"))]

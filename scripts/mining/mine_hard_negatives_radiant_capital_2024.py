@@ -27,7 +27,7 @@ from src.collect.hard_negative_miner import (
 from src.pipeline.incident_pipeline import REGISTRY_PATH, expand_and_build_trajectory
 from src.trajectories.builder import load_trajectory_config
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 INCIDENT_ID = "radiant_capital_arbitrum_2024"
 TARGET_COUNT = 25  # khop quy uoc target_per_incident da dung cho 11 incident cu (vong mine dau tien)
 MAX_CANDIDATES_CHECKED = 150
