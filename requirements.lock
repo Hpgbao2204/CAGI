@@ -1,67 +1,14 @@
-# requirements.lock — CAGI-ED, freeze v1.0 (Tuần 10 reproducibility sprint)
-#
-# Sinh ra bằng cach dung mot venv HOAN TOAN SACH (khong phai moi truong
-# Python dung chung tren may, von co hang tram goi khong lien quan du an
-# nay - vd frida/pwntools/volatility3/mysql-connector... - da xac nhan
-# KHONG duoc dung o dau trong src/scripts/tests qua grep import truc tiep):
-#
-#   python -m venv .venv_clean
-#   .venv_clean\Scripts\pip install -r requirements.lock
-#
-# QUAN TRONG: file nay liet ke DUNG dependency closure ma code THAT SU
-# dung (xac nhan qua grep import + chay pytest 177/177 pass tren chinh
-# venv nay) - KHONG phai pip freeze cua moi truong dung chung. requirements.txt
-# (khong ghim version) da duoc sua lai cho khop (bo polars/networkx/responses -
-# 3 goi liet ke truoc do nhung KHONG duoc import o bat ky dau trong code,
-# them joblib/psutil/scipy - dung truc tiep nhung thieu trong requirements.txt cu).
-#
-# numpy ghim THU CONG = 2.2.4 (khop dung ban da dung xuyen suot Tuan 5-9,
-# xem freeze_v1.0.json) - pip tu resolve se ra 2.5.2 (moi hon) neu khong
-# ghim, co the gay lech ket qua nho do lam tron floating-point khac nhau
-# giua 2 ban numpy - xem results/reports/reproduction_v1.0.md Buoc 5 de
-# biet ket qua so sanh THAT giua 2 ban.
-#
-# Python: 3.13.0 (CPython, Windows-11-10.0.26200-SP0, AMD64)
-# pip: 26.2.1
-
-# --- Direct dependency (dung truc tiep trong src/scripts/tests, xac nhan qua grep) ---
-pandas==3.0.2
-numpy==2.2.4
-scikit-learn==1.9.0
-xgboost==3.4.0
-scipy==1.17.1
+numpy==2.4.6
+pandas==3.0.6
 pyarrow==25.0.1
-PyYAML==6.0.3
-requests==2.32.3
-pytest==9.1.1
-matplotlib==3.10.1
-pydantic==2.11.5
-python-dotenv==1.2.2
-joblib==1.5.3
+scipy==1.17.1
+scikit-learn==1.9.1
+xgboost==3.2.0
+torch==2.14.0  # CPU build: --index-url https://download.pytorch.org/whl/cpu
+pydantic==2.13.5
+PyYAML==6.0.1
+requests==2.33.1
+python-dotenv==1.2.3
 psutil==7.2.2
-
-# --- Transitive dependency (pip tu giai quyet, ghi lai CHINH XAC de tai lap) ---
-annotated-types==0.8.0
-certifi==2026.7.22
-charset-normalizer==3.5.1
-colorama==0.4.6
-contourpy==1.3.3
-cycler==0.12.1
-fonttools==4.63.0
-idna==3.19
-iniconfig==2.3.0
-kiwisolver==1.5.0
-narwhals==2.24.0
-packaging==26.3
-pillow==12.3.0
-pluggy==1.6.0
-pydantic_core==2.33.2
-Pygments==2.21.0
-pyparsing==3.3.2
-python-dateutil==2.9.0.post0
-six==1.17.0
-threadpoolctl==3.6.0
-typing_extensions==4.16.0
-typing-inspection==0.4.4
-tzdata==2026.3
-urllib3==2.7.0
+matplotlib==3.11.2
+pytest==9.1.1

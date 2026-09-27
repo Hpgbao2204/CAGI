@@ -1,9 +1,7 @@
-"""S1: GRU nho tren chuoi token hanh dong co kieu (Todo T19) — baseline hoc
-bieu dien tuan tu truc tiep, doi chieu voi feature thu cong cua M1.
-
-Token cua action i = (event_type, bucket log khoang cach thoi gian toi action
-truoc) -> 10 x 6 = 60 token + PAD. Chi dung toi da 64 action CUOI cua prefix
-(prefix-safe: khong doc action > k).
+"""S1 baseline: a small GRU over typed action tokens (event type x log-scale
+gap bucket, last 64 actions of the prefix), trained with a class-weighted
+loss. Tests whether a sequence model learns the typed structure without
+hand-crafted motifs.
 """
 from __future__ import annotations
 

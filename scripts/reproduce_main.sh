@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
-# Tai tao TOAN BO so lieu + hinh cua paper.
+# Regenerate every table (results/tables) and figure (paper/figures).
 #
-#   bash scripts/reproduce_main.sh            # tu data/processed/trajectories_v3.jsonl.gz (khong can API)
-#   bash scripts/reproduce_main.sh --raw      # build lai trajectory tu data/raw/ (giai nen data/raw_archive/ truoc)
-#
-# Crawl lai data/raw tu dau (can ETHERSCAN_API_KEY, BSCTRACE_API_KEY):
-#   python scripts/crawl_all.py --chains eth arbitrum
-#   python scripts/crawl_all.py --chains bsc
+#   bash scripts/reproduce_main.sh          # from data/processed/trajectories_v3.jsonl.gz (no API)
+#   bash scripts/reproduce_main.sh --raw    # rebuild trajectories from data/raw (extract data/raw_archive first)
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 export PYTHONPATH="$PWD" PYTHONIOENCODING=utf-8 PYTHONUTF8=1
@@ -17,7 +13,8 @@ if [[ "${1:-}" == "--raw" ]]; then
 else
   "$PY" scripts/run_experiments.py --stage dataset --from-export
 fi
-"$PY" scripts/run_experiments.py --stage rq1 seq rq2 calib explain stress builder synth gate runtime
+"$PY" scripts/run_experiments.py --stage rq1 seq rq2 rq2paired calib explain stress synth gate runtime
+# builder sensitivity rebuilds trajectories with other settings: needs data/raw
+if [[ -d data/raw/eth ]]; then "$PY" scripts/run_experiments.py --stage builder; fi
 "$PY" scripts/make_figures.py
-echo "Xong: results/tables/*.csv, paper/figures/fig*.pdf"
-echo "Luu y: runtime.csv phu thuoc phan cung (xem results/tables/runtime_hardware.json)."
+echo "Done: results/tables/*, paper/figures/fig*.pdf (runtime.csv depends on the hardware)."

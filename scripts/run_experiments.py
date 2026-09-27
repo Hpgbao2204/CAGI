@@ -1,23 +1,15 @@
-"""Chay TOAN BO thuc nghiem cua paper tu data/raw (offline) va ghi moi con
-so vao results/ tu MOT lan chay duy nhat (run manifest ghi commit + config).
+"""Run every experiment of the paper from one command and one commit.
 
-    python scripts/run_experiments.py            # tat ca
-    python scripts/run_experiments.py --stage dataset rq1 ...
+    python scripts/run_experiments.py                  # all stages
+    python scripts/run_experiments.py --stage rq1 rq2  # selected stages
 
-Stage (theo thu tu phu thuoc):
-  dataset   : build trajectory (do_collect=False) + prefix feature -> data/processed/
-  rq1       : B0,B1,B2,B3,B3',M1 + representation study + ablation + nested
-              feature selection + paired bootstrap (Todo T1,T3,T7,T13,T14,T19)
-  rq2       : checkpoint + time-horizon PR-AUC, online scoring moi prefix,
-              lead time, false-alert (Todo T2,T5,T6,T15)
-  calib     : raw/Platt/isotonic Brier + ECE + CI (Todo T16)
-  explain   : TreeSHAP global + case study (Todo T9)
-  stress    : mimicry stress test + per-bridge-family (Todo T20)
-  builder   : do nhay hop limit / min share (Todo T18)
-  gate      : RQ3 data gate
-  runtime   : RQ4 latency/memory
-
-Moi ket qua trung gian luu data/processed/exp/*.pkl de stage sau dung lai.
+Stages: dataset (build trajectories + prefix features), rq1 (detectors,
+representation study, ablations, nested selection, seeds), spearman, seq
+(GRU baseline), rq2 (checkpoints, online replay, lead time, false alerts),
+rq2paired (paired tests per checkpoint/horizon), calib, explain (TreeSHAP),
+stress (mimicry, per bridge family), builder (depth/share sensitivity), synth
+(CAGI-Synth, synthetic only), gate (RQ3 data gate), runtime (RQ4).
+Outputs go to results/tables/; intermediates to data/processed/exp/.
 """
 from __future__ import annotations
 
@@ -40,9 +32,8 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from src.evaluation.loio import (  # noqa: E402
-    ap, bootstrap_metric, brier, ece, paired_bootstrap, per_incident, run_loio,
+    ap, bootstrap_metric, brier, dedupe_pooled_prefixes, ece, paired_bootstrap, per_incident, run_loio,
 )
-from src.evaluation.nested_eval import dedupe_pooled_prefixes  # noqa: E402
 from src.features.extractor import extract_all_prefixes, extract_features  # noqa: E402
 from src.models.baselines import (  # noqa: E402
     FLAT_FEATURES, MOTIF_FEATURES, TEMPORAL_FEATURES, TYPED_ACTION_FEATURES,

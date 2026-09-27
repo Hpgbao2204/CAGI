@@ -1,8 +1,6 @@
-"""Ve toan bo hinh thuc nghiem cua paper tu results/tables/ + data/processed/exp/.
-
-Moi panel la 1 file PDF vector rieng, dat ten figNx.pdf (vd fig3a.pdf,
-fig3b.pdf) trong paper/figures/, de ghep trong LaTeX bang subcaption.
-Figure 1 (kien truc) ve tay bang draw.io, khong sinh o day.
+"""Draw every experimental figure of the paper (paper/figures/figNx.pdf, one
+PDF per panel) and the appendix incident table from results/tables and
+data/processed/exp. Figure 1 (architecture) is drawn by hand.
 
     python scripts/make_figures.py
 """
@@ -54,7 +52,6 @@ plt.rcParams.update({
 def save(fig, name):
     OUT.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / f"{name}.pdf")
-    fig.savefig(OUT / f"{name}.png", dpi=200)
     plt.close(fig)
     print("  ->", name)
 

@@ -1,19 +1,9 @@
-"""Crawl lai TOAN BO data/raw/ tu API (Etherscan V2 cho eth/arbitrum,
-NodeReal MegaNode cho bsc) theo dung metadata/ — dung khi clone sach khong
-co cache.
+"""Re-collect data/raw from the explorer APIs for every trajectory listed in
+metadata/ (incidents and hard negatives), using the same
+expand_and_build_trajectory as the dataset builder. Resumable and shardable.
 
-Moi trajectory (positive/control trong incident_registry.csv, hard-negative
-trong hard_negative_registry*.csv) duoc mo rong bang CHINH
-expand_and_build_trajectory(do_collect=True) ma pipeline dung de build
-dataset, voi cung max_iterations (positive: config.max_depth, negative: 2 —
-khop src/pipeline/dataset_builder.py), nen cache thu duoc la dung tap dia
-chi ma load_rq1_trajectories(do_collect=False) se doc lai.
-
-Chay tiep duoc (resume): trajectory da xong ghi vao data/raw/_crawl_state.json
-va bi bo qua o lan chay sau.
-
-    python scripts/crawl_all.py --chains eth arbitrum   # Etherscan (3 req/s)
-    python scripts/crawl_all.py --chains bsc            # NodeReal (quota rieng)
+    python scripts/crawl_all.py --chains eth arbitrum   # Etherscan V2 (3 req/s free tier)
+    python scripts/crawl_all.py --chains bsc            # NodeReal MegaNode
 """
 from __future__ import annotations
 

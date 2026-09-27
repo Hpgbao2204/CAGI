@@ -3,10 +3,9 @@ Test cho baseline/primary models (Bước 6), dùng dữ liệu synthetic.
 """
 import numpy as np
 
-from src.evaluation.dataset import build_prefix_dataset
 from src.models.baselines import get_all_baselines
 from src.trajectories.builder import TrajectoryConfig
-from tests.fixtures.synthetic_trajectories import build_synthetic_dataset
+from tests.fixtures.synthetic_trajectories import build_prefix_dataset, build_synthetic_dataset
 
 CONFIG = TrajectoryConfig(max_depth=6, time_horizon_hours=72, min_tainted_share=0.05)
 

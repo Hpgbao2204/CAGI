@@ -1,67 +1,137 @@
 {
- "dataset": {
-  "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
-  "src_dirty": true,
-  "finished_utc": "2026-09-27T19:34:49.028426+00:00"
+ "note": "Tables were produced by the original run (commit 10efb65, with uncommitted edits in src/pipeline/dataset_builder.py only). A clean re-run of scripts/reproduce_main.sh from the exported trajectories at commit 80b1ba0 regenerated all stages except rq2paired and matched every regenerated table byte-for-byte, except runtime.csv (hardware-dependent) and builder_sensitivity.csv (needs data/raw). rq2_checkpoints_paired.csv, builder_sensitivity.csv and the spearman/rq2paired entries come from the original run.",
+ "clean_reproduction": {
+  "dataset": {
+   "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T20:11:12.915400+00:00"
+  },
+  "spearman": {
+   "commit": "e403c68d5c0e9a137b0938dcc7e630a866dd556c",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T19:43:47.447104+00:00"
+  },
+  "rq2paired": {
+   "commit": "e403c68d5c0e9a137b0938dcc7e630a866dd556c",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T19:49:06.194472+00:00"
+  },
+  "rq1": {
+   "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T20:27:12.365498+00:00"
+  },
+  "seq": {
+   "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T20:27:12.365514+00:00"
+  },
+  "rq2": {
+   "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T20:27:12.365517+00:00"
+  },
+  "calib": {
+   "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T20:27:12.365519+00:00"
+  },
+  "explain": {
+   "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T20:27:12.365522+00:00"
+  },
+  "stress": {
+   "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T20:27:12.365523+00:00"
+  },
+  "synth": {
+   "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T20:27:12.365528+00:00"
+  },
+  "gate": {
+   "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T20:27:12.365531+00:00"
+  },
+  "runtime": {
+   "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T20:27:12.365534+00:00"
+  },
+  "builder": {
+   "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T20:27:12.365526+00:00"
+  }
  },
- "spearman": {
-  "commit": "e403c68d5c0e9a137b0938dcc7e630a866dd556c",
-  "src_dirty": false,
-  "finished_utc": "2026-09-27T19:43:47.447104+00:00"
- },
- "rq2paired": {
-  "commit": "e403c68d5c0e9a137b0938dcc7e630a866dd556c",
-  "src_dirty": false,
-  "finished_utc": "2026-09-27T19:49:06.194472+00:00"
- },
- "rq1": {
-  "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
-  "src_dirty": true,
-  "finished_utc": "2026-09-27T19:55:10.176652+00:00"
- },
- "seq": {
-  "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
-  "src_dirty": true,
-  "finished_utc": "2026-09-27T19:55:10.176671+00:00"
- },
- "rq2": {
-  "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
-  "src_dirty": true,
-  "finished_utc": "2026-09-27T19:55:10.176674+00:00"
- },
- "calib": {
-  "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
-  "src_dirty": true,
-  "finished_utc": "2026-09-27T19:55:10.176676+00:00"
- },
- "explain": {
-  "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
-  "src_dirty": true,
-  "finished_utc": "2026-09-27T19:55:10.176679+00:00"
- },
- "stress": {
-  "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
-  "src_dirty": true,
-  "finished_utc": "2026-09-27T19:55:10.176681+00:00"
- },
- "synth": {
-  "commit": "0bb7e70cf334aa51b48a9e0c9ccdb4131d602658",
-  "src_dirty": true,
-  "finished_utc": "2026-09-27T20:00:54.198269+00:00"
- },
- "gate": {
-  "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
-  "src_dirty": true,
-  "finished_utc": "2026-09-27T19:55:10.176687+00:00"
- },
- "runtime": {
-  "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
-  "src_dirty": true,
-  "finished_utc": "2026-09-27T19:55:10.176690+00:00"
- },
- "builder": {
-  "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
-  "src_dirty": true,
-  "finished_utc": "2026-09-27T19:55:10.176692+00:00"
+ "original_run": {
+  "dataset": {
+   "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
+   "src_dirty": true,
+   "finished_utc": "2026-09-27T19:34:49.028426+00:00"
+  },
+  "spearman": {
+   "commit": "e403c68d5c0e9a137b0938dcc7e630a866dd556c",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T19:43:47.447104+00:00"
+  },
+  "rq2paired": {
+   "commit": "e403c68d5c0e9a137b0938dcc7e630a866dd556c",
+   "src_dirty": false,
+   "finished_utc": "2026-09-27T19:49:06.194472+00:00"
+  },
+  "rq1": {
+   "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
+   "src_dirty": true,
+   "finished_utc": "2026-09-27T19:55:10.176652+00:00"
+  },
+  "seq": {
+   "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
+   "src_dirty": true,
+   "finished_utc": "2026-09-27T19:55:10.176671+00:00"
+  },
+  "rq2": {
+   "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
+   "src_dirty": true,
+   "finished_utc": "2026-09-27T19:55:10.176674+00:00"
+  },
+  "calib": {
+   "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
+   "src_dirty": true,
+   "finished_utc": "2026-09-27T19:55:10.176676+00:00"
+  },
+  "explain": {
+   "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
+   "src_dirty": true,
+   "finished_utc": "2026-09-27T19:55:10.176679+00:00"
+  },
+  "stress": {
+   "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
+   "src_dirty": true,
+   "finished_utc": "2026-09-27T19:55:10.176681+00:00"
+  },
+  "synth": {
+   "commit": "0bb7e70cf334aa51b48a9e0c9ccdb4131d602658",
+   "src_dirty": true,
+   "finished_utc": "2026-09-27T20:00:54.198269+00:00"
+  },
+  "gate": {
+   "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
+   "src_dirty": true,
+   "finished_utc": "2026-09-27T19:55:10.176687+00:00"
+  },
+  "runtime": {
+   "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
+   "src_dirty": true,
+   "finished_utc": "2026-09-27T19:55:10.176690+00:00"
+  },
+  "builder": {
+   "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
+   "src_dirty": true,
+   "finished_utc": "2026-09-27T19:55:10.176692+00:00"
+  }
  }
 }

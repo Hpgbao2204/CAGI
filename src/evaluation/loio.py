@@ -1,15 +1,11 @@
-"""Leave-one-incident-out (LOIO) engine dung cho toan bo thuc nghiem cua
-paper (scripts/run_experiments.py).
+"""Leave-one-incident-out (LOIO) evaluation used by every experiment.
 
-Khac src/evaluation/nested_eval.py::evaluate_model_nested o 2 diem:
-1. Giu lai model + calibrator cua TUNG fold de cham diem prefix bat ky cua
-   incident bi giu lai (online scoring moi k, moc thoi gian, stress test) —
-   khong chi cac dong checkpoint co san.
-2. Vong inner LOIO (sinh OOF tren tap train de fit Platt) la tuy chon, bo
-   qua duoc cho baseline khong can calibration (nhanh hon).
-
-Khong dong nao cua incident bi giu lai duoc dung de fit model, calibrator
-hay chon nguong.
+For each held-out incident group, the model, the Platt/isotonic calibrators
+(fitted on inner LOIO scores of the training groups) and every feature
+filter are fitted on the other groups only. Fold models are kept so that
+any prefix of a held-out trajectory can be scored later (online replay,
+time horizons, stress tests). Metrics and bootstrap intervals resample
+incidents, not prefix rows, because rows of one incident are dependent.
 """
 from __future__ import annotations
 
@@ -99,6 +95,38 @@ def run_loio(
                 oof_cal[mth][te] = cal(raw_te)
         folds[str(g)] = fm
     return LOIOResult(oof_raw=oof_raw, oof_cal=oof_cal, folds=folds)
+
+
+DEDUPE_LABEL_PRIORITY = ["ratio_25", "ratio_50", "ratio_75", "ratio_100", "k_2", "k_3", "k_5", "k_7"]
+
+
+def dedupe_pooled_prefixes(
+    df: "pd.DataFrame",
+    id_col: str = "source_id",
+    length_col: str = "prefix_len",
+    label_col: str = "prefix_label",
+    priority: Sequence[str] = DEDUPE_LABEL_PRIORITY,
+) -> "pd.DataFrame":
+    """Pool prefix rows once per physical observation: rows of the same
+    trajectory (`source_id`, NOT `trajectory_id`, which names the incident
+    group) and the same `prefix_len` have identical features even when they
+    come from several checkpoints (e.g. ratio_75 and ratio_100 of a 3-action
+    trajectory). Keeps one row per (source_id, prefix_len), choosing its
+    label by `priority`; row order is preserved."""
+    df = df.reset_index(drop=True)
+    prio_map = {label: i for i, label in enumerate(priority)}
+    prio = df[label_col].map(prio_map).fillna(len(priority))
+
+    keep_positions: List[int] = []
+    seen = set()
+    order = prio.sort_values(kind="stable").index  # duyet theo uu tien tang dan
+    for pos in order:
+        key = (df.at[pos, id_col], df.at[pos, length_col])
+        if key not in seen:
+            seen.add(key)
+            keep_positions.append(pos)
+    keep_positions.sort()  # giu thu tu dong ban dau (khong xao tron)
+    return df.loc[keep_positions].reset_index(drop=True)
 
 
 # ----------------------------------------------------------------------

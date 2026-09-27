@@ -1,21 +1,10 @@
-"""CAGI-Synth: bo sinh trajectory TONG HOP (khong phai du lieu that) de kiem
-tra do ben cua detector o do kho co the dieu chinh.
-
-Moi "incident tong hop" gom 1 trajectory rua tien (label=1) va N trajectory
-binh thuong (label=0) cung chain/khung thoi gian. Cau truc duoc lay mau tu
-cac typology cong khai (MITRE AADAPT: peel chain, siphon/split, layering
-qua DEX, cross-chain hopping, anonymizing service) va cac kieu hanh vi binh
-thuong (nguoi dung bridge, trader DEX, chi tra/airdrop, gom quy, arbitrage
-bot, nguoi dung mixer).
-
-Nut do kho `difficulty` d in [0, 1]:
-  * negative: voi xac suat d, trajectory binh thuong duoc lay tu cac kieu
-    "giong rua tien" (bridge->swap->split nhanh, gom -> bridge) thay vi kieu
-    thong thuong;
-  * positive: voi xac suat d moi buoc, ke tan cong chen transfer "moi nhu"
-    gia tri nho va gian nhip thoi gian (tang khoang cach, giam burstiness).
-Du lieu nay CHI dung cho benchmark tong hop, bao cao TACH RIENG khoi ket qua
-tren du lieu that.
+"""CAGI-Synth: generator of SYNTHETIC laundering and benign trajectories with a
+difficulty knob d in [0, 1]. Laundering follows five public typologies
+(peel chain, split-swap-bridge, swap-mixer, nested bridge, lending round
+trip); benign behaviour six ordinary patterns padded with routine activity.
+With probability d a benign trajectory uses a laundering-like pattern, the
+launderer inserts decoys and slows down, and benign amounts/tempo move toward
+the laundering range. Used only as a separately reported sanity benchmark.
 """
 from __future__ import annotations
 
