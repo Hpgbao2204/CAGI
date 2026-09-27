@@ -1,0 +1,35 @@
+%=============================================================================
+\section{Experimental Setup}
+\label{sec:setup}
+%=============================================================================
+
+\paragraph{Research questions.}
+\textbf{RQ1} Does typing the actions and adding motifs improve detection over a type-agnostic view of the same flow?
+\textbf{RQ2} How early can laundering be detected, measured by online horizon, lead time before the endpoint and false alerts on hard negatives?
+\textbf{RQ3} Are the scores calibrated and explainable, and how robust are they to ablations, mimicry and builder settings?
+\textbf{RQ4} Is the pipeline practical on commodity hardware, and is next-action forecasting supported by the data?
+
+\paragraph{Detectors.}
+\textbf{B0} predicts the training prevalence.
+\textbf{B1} is a hand-weighted typology score over motif counts (bridge$\to$swap, swap$\to$split, split, nested bridge, peel chain, token pivot); it needs no training.
+\textbf{B2} is logistic regression on the action-type shares (bag of actions).
+\textbf{B3} is a random forest (200 trees, depth 8, balanced classes) on the 14 flat features.
+\textbf{B3$'$} is \emph{the same XGBoost learner as M1}, with the same hyperparameters, class weighting, coverage filter and seed, on the 14 flat features; M1 and B3$'$ therefore differ only in the representation.
+\textbf{S1} is a GRU (embedding 16, hidden 32, 25 epochs, class-weighted loss) over the last 64 typed tokens of the prefix, where a token combines the action type with a log-scale bucket of the gap to the previous action; it tests whether a sequence model learns the typed structure without hand-crafted motifs.
+\textbf{M1} is CAGI-ED's scorer on all 37 features (Sect.~\ref{sec:scoring}).
+The representation study adds typed-action and motif groups one at a time to the flat set with the learner fixed.
+We do not re-run CONNECTOR or ABCTracer: they associate bridge transactions and output matched pairs, not laundering probabilities.
+
+\paragraph{Protocol.}
+All results use leave-one-incident-out (LOIO): in each of the 15 folds, the incident and all negatives mined for it are held out and every model, calibrator and feature filter is fitted on the other 14 groups.
+Platt and isotonic calibrators are fitted on inner LOIO scores of the training groups only.
+Prefix rows of the same (trajectory, $k$) that arise from several checkpoints are pooled once.
+The primary metric is pooled out-of-fold PR-AUC (average precision), which is appropriate at an 8\% positive rate; we also report the mean of per-incident PR-AUC.
+Uncertainty is estimated by an incident-level bootstrap (2{,}000 resamples of the 15 groups with replacement, seed 42), because prefix rows of one incident are dependent.
+Paired comparisons resample incidents once and recompute both detectors on the same rows; the two-sided $p$-value is $2\min(\Pr[\Delta^*\le0],\Pr[\Delta^*\ge0])$.
+Feature choices that were made after seeing earlier results (dropping bridge-context features) are re-examined by a nested LOIO in which the choice is made inside each training split.
+Seeds do not affect M1 or B3$'$ (XGBoost without subsampling is deterministic); we report the seed variation of B3 and S1.
+
+\paragraph{Implementation.}
+Python~3.11, scikit-learn, XGBoost and PyTorch (CPU only) on \TBD{hardware}.
+Every number in this paper is produced by one script (\texttt{scripts/run\_experiments.py}) from one commit; the run manifest records the commit of each stage.
