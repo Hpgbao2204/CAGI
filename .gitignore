@@ -20,3 +20,5 @@ paper/*.synctex.gz
 # crawl/experiment intermediates
 data/processed/exp/
 experiments/logs/crawl_*.log
+paper/*.pdf
+!paper/figures/*.pdf
