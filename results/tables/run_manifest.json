@@ -1,5 +1,5 @@
 {
- "note": "Tables were produced by the original run (commit 10efb65, uncommitted edits in src/pipeline/dataset_builder.py only). A clean re-run from the exported trajectories at the commit below reproduced every table byte-for-byte except runtime.csv (hardware-dependent); builder_sensitivity.csv needs data/raw and comes from the original run.",
+ "note": "Tables were produced by the original run (commit 10efb65, with uncommitted edits in src/pipeline/dataset_builder.py only). A clean re-run of scripts/reproduce_main.sh from the exported trajectories at commit 80b1ba0 regenerated all stages except rq2paired and matched every regenerated table byte-for-byte, except runtime.csv (hardware-dependent) and builder_sensitivity.csv (needs data/raw). rq2_checkpoints_paired.csv, builder_sensitivity.csv and the spearman/rq2paired entries come from the original run.",
  "clean_reproduction": {
   "dataset": {
    "commit": "80b1ba04d363772a42e6090c12e32598e7cb7d3a",
