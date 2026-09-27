@@ -120,52 +120,30 @@ CAGI-ED (ours) & 2026 & \none & \full & \full & \full & \full & \full & \none \\
 \label{sec:problem}
 %=============================================================================
 
-Let $\mathcal{C}=\{\text{Ethereum},\text{BSC},\text{Arbitrum}\}$.
-A decoded action is a tuple $a=(t,c,u,v,y,\kappa,q,\pi)$ with timestamp $t$, chain $c\in\mathcal{C}$, source and destination addresses $u,v$, semantic type $y\in\mathcal{Y}$, token $\kappa$, log-scaled amount $q=\log(1+\text{amount})$ and protocol label $\pi$.
-The type vocabulary is
-\begin{align*}
-\mathcal{Y}=\{&\textsf{transfer},\textsf{swap},\textsf{bridge\_dep},\textsf{bridge\_wdr},\textsf{lend\_dep},\\
-&\textsf{lend\_wdr},\textsf{split},\textsf{merge},\textsf{mixer/exit},\textsf{other}\}.
-\end{align*}
+A decoded action is a tuple $a=(t,c,u,v,y,\kappa,q,\pi)$ with timestamp $t$, chain $c\in\{\text{Ethereum},\text{BSC},\text{Arbitrum}\}$, source and destination addresses $u,v$, token $\kappa$, log-scaled amount $q=\log(1+\text{amount})$, protocol label $\pi$ and semantic type $y\in\mathcal{Y}$, where $\mathcal{Y}$ holds ten types: \textsf{transfer}, \textsf{swap}, \textsf{bridge\_dep}, \textsf{bridge\_wdr}, \textsf{lend\_dep}, \textsf{lend\_wdr}, \textsf{split}, \textsf{merge}, \textsf{mixer/exit} and \textsf{other}.
 
 \begin{definition}[Trajectory and prefix]
-Given a seed address $s$, a trajectory $\tau=(a_1,\dots,a_n)$ is the time-ordered sequence of actions reached from $s$ by bounded value-flow expansion (Alg.~\ref{alg:builder}).
-Its prefix of length $k$ is $\tau_{1:k}=(a_1,\dots,a_k)$, and at wall-clock time $t$ a monitor has observed $\tau_{1:k(t)}$ with $k(t)=|\{i: t_i\le t\}|$.
+A trajectory $\tau=(a_1,\dots,a_n)$ is the time-ordered sequence of actions reached from a seed $s$ by Alg.~\ref{alg:builder}; its prefix $\tau_{1:k}=(a_1,\dots,a_k)$ is observed at time $t$ for $k(t)=|\{i: t_i\le t\}|$.
 \end{definition}
-
-For an incident trajectory whose exit is confirmed by a public source, the endpoint is the first action that moves the funds off the monitored chain or into a pool that breaks the trace,
-\begin{equation}
-e^\star=\min\{i: y_i\in\mathcal{Y}_{\mathrm{exit}}\},\qquad t_e=t_{e^\star},
-\label{eq:endpoint}
-\end{equation}
-with $\mathcal{Y}_{\mathrm{exit}}=\{\textsf{bridge\_dep},\textsf{lend\_dep},\textsf{mixer/exit}\}$.
 
 \begin{definition}[Early warning]
 A detector maps each prefix to a score $\hat p_k=g(\tau_{1:k})\approx\Pr(\text{laundering}\mid\tau_{1:k})$ that depends on $a_1,\dots,a_k$ only.
+The endpoint of an incident is its first exit action $e^\star=\min\{i: y_i\in\mathcal{Y}_{\mathrm{exit}}\}$ at time $t_e=t_{e^\star}$, where $\mathcal{Y}_{\mathrm{exit}}$ contains \textsf{bridge\_dep}, \textsf{lend\_dep} and \textsf{mixer/exit}.
 For a threshold $\theta$, the first alert is at $k_a=\min\{k\ge2:\hat p_k\ge\theta\}$, and
 \begin{equation}
 \text{lead time}=t_e-t_{k_a},\qquad \text{lead steps}=e^\star-k_a .
 \label{eq:lead}
 \end{equation}
-The alert is \emph{early} if $k_a<e^\star$ and \emph{late} otherwise; late alerts never enter lead-time statistics.
+The alert is \emph{early} if $k_a<e^\star$.
 \end{definition}
 
-Let $\mathcal{P}_e$ be the incidents with a confirmed endpoint inside the trace and $\mathcal{N}_{\ge2}$ the negative trajectories with at least two actions.
-We measure early warning by the early-detection and false-alert rates
+With $\mathcal{P}_e$ the incidents whose confirmed endpoint lies inside the trace and $\mathcal{N}$ the negatives with at least two actions, we report the early-detection and per-trajectory false-alert rates
 \begin{equation}
-\begin{aligned}
-\mathrm{EDR}(\theta)&=\frac{1}{|\mathcal{P}_e|}\,\bigl|\{\tau\in\mathcal{P}_e: k_a(\tau)<e^\star(\tau)\}\bigr|,\\
-\mathrm{FAR}(\theta)&=\frac{1}{|\mathcal{N}_{\ge2}|}\,\bigl|\{\tau\in\mathcal{N}_{\ge2}: \exists k\ge2,\ \hat p_k(\tau)\ge\theta\}\bigr|,
-\end{aligned}
+\mathrm{EDR}(\theta)=\frac{|\{\tau\in\mathcal{P}_e: k_a<e^\star\}|}{|\mathcal{P}_e|},\qquad
+\mathrm{FAR}(\theta)=\frac{|\{\tau\in\mathcal{N}: \max_{k\ge2}\hat p_k\ge\theta\}|}{|\mathcal{N}|}.
 \label{eq:rates}
 \end{equation}
-so that a false alert is counted once per benign trajectory, not once per prefix.
-We evaluate two families of prefixes.
-\emph{Online horizons} $k(t_1+h)$ for $h\in\{1\,\text{min},\dots,24\,\text{h}\}$ are available to a live monitor, whereas \emph{relative checkpoints} $k=\lceil r n\rceil$, $r\in\{25,50,75,100\}\%$, require the final length $n$ and are a retrospective diagnostic only.
-
-The adversary controls pseudonymous addresses holding stolen funds and may use any public bridge, DEX, lending market or mixer.
-The defender knows one seed address from a public report and observes public chain data only.
-Breaking mixer anonymity, discovering incidents by whole-chain scanning, and attributing real-world identities are out of scope.
+The adversary may use any public bridge, DEX, lending market or mixer; the defender knows one seed from a public report and sees public chain data only.
 
 %=============================================================================
 \section{The CAGI-ED Architecture}
@@ -439,12 +417,12 @@ S1 & GRU over typed action tokens & 0.368 [0.221, 0.583] & 0.516 & $+0.111$ (0.2
 \subsection{RQ2: How Long before the Laundering Exit Can CAGI-ED Alert, and at What False-Alert Rate?}
 \label{sec:rq2}
 
-Figure~\ref{fig:4a} scores every trajectory at the online prefix $k(t_1+h)$.
+Figure~\ref{fig:4a} scores every trajectory at the online prefix $k(t_1+h)$ for horizons $h$ from one minute to one day, which is what a live monitor sees.
 One minute after the first action (median $k=2$ for incidents), M1 reaches PR-AUC 0.421 against 0.215 for B3$'$, a paired gain of $+0.206$ [0.032, 0.330], $p=0.010$, and the absolute checkpoint $k=2$ agrees (0.418 vs.\ 0.209, $p=0.008$).
 From five minutes on the two representations are statistically indistinguishable, and from 30 minutes on B3$'$ is numerically ahead, once amounts, fan-out and hop depth have developed.
 The two early results would not survive a Bonferroni correction over eight horizons, but both views point the same way: event types carry the signal when there is no structure yet.
 
-The retrospective checkpoints confirm the trend (M1 0.483 at $r=25\%$ and 0.702 at $r=100\%$; B3$'$ 0.566 and 0.811).
+Retrospective checkpoints $k=\lceil rn\rceil$, which need the final length $n$, confirm the trend (M1 0.483 at $r=25\%$ and 0.702 at $r=100\%$; B3$'$ 0.566 and 0.811).
 Figure~\ref{fig:4b} shows why early alerts are possible at all: the median calibrated score of incidents rises within the first 10\% of the trajectory, while the median negative stays near 0.03.
 
 We then replay every trajectory action by action with the calibrated M1 of its held-out fold (Alg.~\ref{alg:monitor}) and evaluate Eq.~\eqref{eq:rates} for several $\theta$ (Table~\ref{tab:lead}, Fig.~\ref{fig:4c}).
@@ -458,7 +436,7 @@ After the second action the calibrated score is 0.62 and the alert fires 449\,s 
 
 \begin{table}[t]
 \centering
-\caption{RQ2: first alerts of calibrated M1 when every prefix $k\ge2$ is scored online. ``Before $t_e$'' counts the 10 incidents in $\mathcal{P}_e$; 4 of them have $e^\star=1$ and cannot be alerted early. False alerts are per trajectory over the 206 negatives in $\mathcal{N}_{\ge2}$.}
+\caption{RQ2: first alerts of calibrated M1 when every prefix $k\ge2$ is scored online. ``Before $t_e$'' counts the 10 incidents in $\mathcal{P}_e$; 4 of them have $e^\star=1$ and cannot be alerted early. False alerts are per trajectory over the 206 negatives in $\mathcal{N}$.}
 \label{tab:lead}
 \small
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llllll@{}}
