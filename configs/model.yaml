@@ -1,50 +1,27 @@
-# Model & baseline registry — xem research_questions.md
+# Detectors evaluated in the paper (documentation; implementations in
+# src/models/baselines.py and src/models/sequence.py).
 
 baselines:
-  B0: {name: majority_prevalence, purpose: "sanity check metric tối thiểu"}
-  B1: {name: rule_based_typology_score, purpose: "baseline dễ giải thích, không học"}
-  B2: {name: bag_of_actions_logistic_regression, purpose: "đo giá trị sequence count đơn giản"}
-  B3: {name: flat_graph_rf_xgboost, purpose: "baseline graph không typed semantics"}
+  B0: prevalence (training positive rate)
+  B1: hand-weighted typology score over motif counts, no training
+  B2: logistic regression on action-type shares (bag of actions)
+  B3: random forest (200 trees, depth 8, balanced) on the 14 flat features
+  B3p: XGBoost with M1's exact settings on the 14 flat features (same learner, different representation)
+  S1: GRU over the last 64 typed action tokens (type x log-gap bucket)
 
 primary_model:
   M1:
-    name: typed_temporal_motif_xgboost_or_rf
-    purpose: "mô hình chính, RQ1"
-    # 2026-08-28: loại 9 cột "bridge_context" khỏi feature set CHÍNH THỨC
-    # của M1 sau khi ablation trên 15 incident xác nhận gây hại có ý nghĩa
-    # thống kê (paired diff +0.0638, 95% CI [+0.0101,+0.1501], p=0.036 khi
-    # thêm lại) — hiệu ứng overfitting theo protocol, khuếch đại bởi N (xem
-    # results/reports/bridge_context_ablation_investigation.md). Cấu hình
-    # này khớp ĐÚNG code chính thức: src/models/baselines.py::
-    # BRIDGE_CONTEXT_COLS_EXCLUDED + M1TypedTemporalMotifModel._candidate_columns()
-    # (tham số include_bridge_context=False mặc định — chỉ bật True cho
-    # mục đích ablation/investigation, KHÔNG dùng cho M1 chính thức).
-    # 9 cột đã loại ở dataset schema (vẫn CÓ trong features_v2.parquet ở
-    # mức dataset — cột không bị xoá khỏi dữ liệu, chỉ bị loại khỏi tập
-    # candidate feature MÀ RIÊNG M1 chọn để fit; các model khác (B1 dùng
-    # motif_bridge_then_swap/num_bridge_families/swap_after_bridge trong
-    # rule score) KHÔNG bị ảnh hưởng):
-    excluded_feature_columns:
-      - time_to_first_bridge
-      - action_count_bridge_deposit
-      - action_count_bridge_deposit_ratio
-      - action_count_bridge_withdraw
-      - action_count_bridge_withdraw_ratio
-      - num_bridge_families
-      - swap_after_bridge
-      - motif_bridge_then_swap
-      - motif_nested_bridge
+    learner: XGBoost
+    params: {n_estimators: 200, max_depth: 4, learning_rate: 0.1, random_state: 42}
+    class_weight: scale_pos_weight = n_neg / n_pos on the training fold
+    features: all 37 prefix features (flat + typed actions + motifs)
+    coverage_filter: drop features present in fewer than 2 positive incidents of the training fold
+    calibration: Platt scaling fitted on inner leave-one-incident-out scores of the training fold
+    explanation: exact TreeSHAP contributions of the uncalibrated model
 
-optional_models:
-  M2: {name: small_mlp_or_contrastive_encoder, gate: "chỉ qua data gate contrastive (>=100 positive trajectory độc lập)"}
-  N1: {name: markov_ngram_next_event, purpose: "baseline RQ3"}
-  N2: {name: multinomial_logistic_or_gbm_next_event, gate: ">=1000 transitions, >=30 mẫu/class, majority <60%"}
-
-threshold_policy:
-  metric: "FPR<=1% hoặc max 10 false alerts/1000 trajectories"
-  chosen_on: validation_only
-  test_evaluated: once_after_freeze
-
-hyperparameter_search:
-  strategy: small_fixed_grid
-  no_wide_tuning: true
+protocol:
+  split: leave-one-incident-out (group = incident + its hard negatives)
+  pooling: one row per (trajectory, prefix length) across checkpoints
+  uncertainty: incident-level bootstrap, 2000 resamples, seed 42
+  paired_test: two-sided p = 2 * min(P[d <= 0], P[d >= 0])
+  tuning: none (hyperparameters fixed before evaluation)

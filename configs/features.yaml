@@ -1,62 +1,27 @@
-# Canonical event schema — xem tài liệu phản biện gốc mục 5.4
+# Canonical event schema and prefix features (documentation; implementation
+# in src/normalize/schema.py and src/features/extractor.py).
+
 event_schema:
-  required_fields:
-    - chain_id
-    - block_number
-    - timestamp
-    - tx_hash
-    - log_index
-    - src
-    - dst
-    - event_type   # transfer | bridge_deposit | bridge_withdraw | lending_deposit | lending_withdraw | swap | split | merge | mixer_or_exit | other
-    - amount_norm
+  required: [chain_id, block_number, timestamp, tx_hash, log_index, src, dst, event_type, amount_norm]
+  optional: [protocol, token, counterparty_type, source_confidence]
+  event_type: [transfer, swap, bridge_deposit, bridge_withdraw, lending_deposit, lending_withdraw,
+               split, merge, mixer_or_exit, other]
+  amount_norm: log(1 + raw amount)
 
-  recommended_fields:
-    - protocol
-    - token
-    - counterparty_type
-    - source_confidence
+feature_groups:            # 37 model inputs, computed from actions a_1..a_k only
+  flat:                    # what a type-agnostic transaction graph offers (14)
+    temporal: [inter_action_gap_mean, inter_action_gap_std, burstiness, active_duration_sec]
+    structural: [fan_out, fan_in, unique_counterparties, local_ego_density, path_depth, branch_count]
+    economic: [log_amount_mean, outgoing_incoming_ratio, value_retention, token_category_diversity]
+  typed_action:            # needs the semantic decoder (16)
+    - action_count_<type>_ratio for the 10 event types
+    - [num_distinct_bigrams, num_distinct_trigrams, num_bridge_families, swap_after_bridge,
+       stablecoin_pivot, time_to_first_bridge]
+  motif:                   # counted only when complete inside the prefix (7)
+    - [motif_split, motif_merge, motif_peel_like_chain, motif_bridge_then_swap,
+       motif_swap_then_split, motif_nested_bridge, motif_rapid_token_pivot]
 
-feature_groups:
-  temporal:
-    - time_to_first_bridge
-    - inter_action_gaps
-    - burstiness
-    - active_duration
-    - bridge_latency_percentile
-  structural:
-    - fan_out
-    - fan_in
-    - unique_counterparties
-    - local_ego_density
-    - path_depth
-    - branch_count
-  economic:
-    - log_amount
-    - outgoing_incoming_ratio
-    - value_retention
-    - token_category_diversity
-    - fee_percentile
-  semantic_action:
-    - action_counts
-    - action_bigram_trigram
-    - num_bridge_families
-    - swap_after_bridge
-    - stablecoin_pivot
-  motif:
-    - split
-    - merge
-    - peel_like_chain
-    - bridge_then_swap
-    - swap_then_split
-    - nested_bridge
-    - rapid_token_pivot
-  context:
-    - known_mixer_interaction
-    - public_exit_service_label
-    - protocol_category
-
-anti_leakage_rules:
-  - "Feature tại prefix k chỉ dùng event <= k"
-  - "Motif cần future event để xác nhận phải bị loại hoặc đổi thành 'chưa hoàn tất'"
-  - "Endpoint/mixer/CEX không được dùng làm feature khi mục tiêu là cảnh báo trước endpoint"
+not_model_inputs:
+  - prefix_len and raw action counts (they sum to k and act as a length shortcut)
+  - k / n (uses the final length n: future leak, removed; see tests/test_no_future_leakage.py)
+  - mixer/exit context features (they reveal the endpoint)

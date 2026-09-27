@@ -1,3 +1,5 @@
+> **Note (2026-09-27).** Historical annotation log (in Vietnamese) kept for label provenance. Some files it mentions (e.g. `data/dataset_card.md`, `experiments/logs/*`) were removed in the cleanup and remain in the git history. The current dataset is described in `README.md` and the paper.
+
 # Annotation Guide — CAGI-ED
 
 Tài liệu này tổng hợp mọi quyết định ngữ nghĩa đã áp dụng **nhất quán** qua

@@ -19,8 +19,6 @@ paper/*.fdb_latexmk
 paper/*.synctex.gz
 # crawl/experiment intermediates
 data/processed/exp/
-experiments/logs/crawl_*.log
+logs/
 paper/*.pdf
 !paper/figures/*.pdf
-experiments/logs/run_experiments.log
-experiments/logs/synth.log
