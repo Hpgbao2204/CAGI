@@ -21,6 +21,7 @@ import pandas as pd  # noqa: E402
 from sklearn.metrics import precision_recall_curve  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT))  # pickle trong data/processed/exp tham chieu src.*
 TAB = REPO_ROOT / "results" / "tables"
 EXP = REPO_ROOT / "data" / "processed" / "exp"
 OUT = REPO_ROOT / "paper" / "figures"
@@ -32,13 +33,13 @@ C = {"M1": "#2a78d6", "B3p": "#eb6834", "B3": "#1baf7a", "B1": "#eda100", "B2": 
 NEG = "#8c8b87"
 INK = "#0b0b0b"
 INK2 = "#52514e"
-LABEL = {"M1": "M1 (typed+motif, XGB)", "B3p": "B3$'$ (flat, XGB)", "B3": "B3 (flat, RF)",
-         "B1": "B1 (rules)", "B2": "B2 (bag-of-actions)", "B0": "B0 (prevalence)"}
+LABEL = {"M1": "M1 (typed)", "B3p": "B3$'$ (flat, XGB)", "B3": "B3 (flat, RF)",
+         "B1": "B1 (rules)", "B2": "B2 (bag)", "B0": "B0 (prevalence)"}
 MARK = {"M1": "o", "B3p": "s", "B3": "^", "B1": "D", "B2": "v", "B0": "x"}
 LS = {"M1": "-", "B3p": "--", "B3": "-.", "B1": ":", "B2": ":", "B0": ":"}
 
-W1 = 3.3   # 1 panel trong 1 hang 2 panel (inch)
-H1 = 2.35
+W1 = 2.6   # 1 panel = 0.49\linewidth LNCS (~2.35 in) -> scale ~0.9
+H1 = 1.95
 
 plt.rcParams.update({
     "font.family": "serif", "font.size": 8, "axes.labelsize": 8, "axes.titlesize": 8,
@@ -128,7 +129,8 @@ def fig3():
     ax.set_xlabel("recall")
     ax.set_ylabel("precision")
     ax.set_ylim(0, 1.02)
-    ax.legend(loc="upper right", title="pooled PR-AUC", title_fontsize=6.5)
+    ax.legend(loc="upper right", title="pooled PR-AUC", title_fontsize=6, fontsize=5.8, handlelength=1.6,
+              borderaxespad=0.1)
     save(fig, "fig3a")
 
     per = csv("rq1_per_incident.csv").dropna(subset=["M1", "B3p"])
@@ -387,17 +389,58 @@ def fig7c():
         ax.fill_between(sy.difficulty, sy[f"{m}_ci_low"], sy[f"{m}_ci_high"], color=C[m], alpha=0.10, lw=0)
         ax.plot(sy.difficulty, sy[f"{m}_pr_auc"], color=C[m], ls=LS[m], marker=MARK[m], label=LABEL[m])
     ax.plot(sy.difficulty, sy.M1_real_to_synth_pr_auc, color=INK2, ls=(0, (1, 1)), marker="x",
-            label="M1 trained on real, tested on synth")
+            label="M1 real$\\to$synth")
     ax.plot(sy.difficulty, sy.pos_rate, color=NEG, ls=":", lw=1, label="prevalence")
     ax.set_xlabel("CAGI-Synth difficulty $d$ (synthetic data)")
     ax.set_ylabel("pooled PR-AUC (95% CI)")
     ax.set_ylim(0, 1.02)
-    ax.legend(loc="center left", fontsize=5.8)
+    ax.legend(loc="center right", fontsize=5.6, ncol=2, handlelength=1.5)
     save(fig, "fig7c")
 
 
+SHORT_NAME = {
+    "bsc_token_hub_2022": "BSC Token Hub", "chibi_finance_2023": "Chibi Finance", "deltaprime_arbitrum_2024": "DeltaPrime",
+    "feg_bridge_2024": "FEG SmartBridge", "hackerdao_2022": "HackerDAO", "magic_abracadabra_arbitrum_2025": "Abracadabra (MIM)",
+    "new_free_dao_2022": "New Free DAO", "paraluni_2022": "Paraluni", "qbridge_qubit_2022": "Qubit QBridge",
+    "radiant_capital_arbitrum_2024": "Radiant Capital", "ronin_bridge_2022": "Ronin Bridge", "utopiasphere_2024": "UtopiaSphere",
+    "wault_finance_2021": "Wault Finance", "wooppv2_2024": "WOOFi WooPPV2", "xkingdom_2024": "XKingdom",
+}
+
+
+def appendix_table():
+    """paper/sections/appendix_incidents.tex tu metadata + results (truy vet duoc)."""
+    import json
+    reg = pd.read_csv(REPO_ROOT / "metadata" / "incident_registry.csv").set_index("incident_id")
+    inc = csv("incident_table.csv").set_index("incident_id")
+    prov = json.loads((TAB / "dataset_provenance.json").read_text())
+    trajs = {t["source_id"]: t["trajectory"] for t in load("trajectories")}
+    chain = {"eth": "ETH", "bsc": "BSC", "arbitrum": "ARB"}
+    lines = []
+    for i in sorted(inc.index, key=lambda k: trajs[k].actions[0].timestamp):
+        r, t = inc.loc[i], trajs[i]
+        src = "; ".join(str(reg.loc[i, "source_report"]).split(";")[:2]).replace("&", "\\&")
+        ep = r.endpoint_type.replace("_", " ") if isinstance(r.endpoint_type, str) and r.endpoint_type else "--"
+        epi = f"{int(r.endpoint_idx)}" if r.endpoint_idx == r.endpoint_idx else "--"
+        mark = "$^\\dagger$" if prov.get(i) == "original_decoded_trace" else ""
+        lines.append(f"{SHORT_NAME[i]}{mark} & {t.actions[0].timestamp:%Y-%m-%d} & {chain[r.chain]} & "
+                     f"{t.seed_address[:8]}\\ldots & {int(r.n_actions)} & {r.duration_h:.1f} & {ep} ({epi}) & "
+                     f"{int(r.n_negatives)} & {src} \\\\")
+    body = "\n".join(lines)
+    tex = ("\\begin{table}[h]\n\\centering\n\\caption{The 15 incidents. $n$: actions in the trajectory; "
+           "endpoint: type and index $e^\\star$ of the first exit action in the trace (-- if the confirmed exit "
+           "lies outside the traced chain or depth); Neg.: hard negatives with a complete cache. "
+           "$^\\dagger$ rebuilt from our earlier decoded trace (Sect.~\\ref{sec:data}).}\n"
+           "\\label{tab:incidents}\n\\scriptsize\n\\setlength{\\tabcolsep}{2.5pt}\n"
+           "\\resizebox{\\linewidth}{!}{%\n\\begin{tabular}{@{}lllcrrlrp{3.0cm}@{}}\n\\toprule\n"
+           "Incident & Start & Chain & Seed & $n$ & Hours & Endpoint ($e^\\star$) & Neg. & Public sources \\\\\n"
+           "\\midrule\n" + body + "\n\\bottomrule\n\\end{tabular}}\n\\end{table}\n")
+    out = REPO_ROOT / "paper" / "sections" / "appendix_incidents.tex"
+    out.write_text(tex)
+    print("  ->", out.name)
+
+
 def main():
-    for f in (fig2, fig3, fig4, fig5, fig6, fig7, fig7c):
+    for f in (fig2, fig3, fig4, fig5, fig6, fig7, fig7c, appendix_table):
         print(f.__name__)
         f()
 

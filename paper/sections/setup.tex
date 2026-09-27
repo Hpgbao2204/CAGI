@@ -28,8 +28,8 @@ The primary metric is pooled out-of-fold PR-AUC (average precision), which is ap
 Uncertainty is estimated by an incident-level bootstrap (2{,}000 resamples of the 15 groups with replacement, seed 42), because prefix rows of one incident are dependent.
 Paired comparisons resample incidents once and recompute both detectors on the same rows; the two-sided $p$-value is $2\min(\Pr[\Delta^*\le0],\Pr[\Delta^*\ge0])$.
 Feature choices that were made after seeing earlier results (dropping bridge-context features) are re-examined by a nested LOIO in which the choice is made inside each training split.
-Seeds do not affect M1 or B3$'$ (XGBoost without subsampling is deterministic); we report the seed variation of B3 and S1.
+Seeds do not affect M1 or B3$'$ (XGBoost without subsampling is deterministic); we report the seed variation of the random-forest baseline B3 (s.d.\ 0.006 over five seeds).
 
 \paragraph{Implementation.}
-Python~3.11, scikit-learn, XGBoost and PyTorch (CPU only) on \TBD{hardware}.
+Python~3.11 with scikit-learn~1.9, XGBoost~3.2 and PyTorch (CPU only) on a 4-core Intel Xeon (2.1\,GHz) with 16\,GB of RAM under Linux; no GPU is used.
 Every number in this paper is produced by one script (\texttt{scripts/run\_experiments.py}) from one commit; the run manifest records the commit of each stage.

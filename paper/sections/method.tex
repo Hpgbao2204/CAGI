@@ -7,9 +7,10 @@
 Let $\mathcal{C}=\{\text{Ethereum},\text{BSC},\text{Arbitrum}\}$.
 A decoded action is a tuple $a=(t,c,u,v,y,\kappa,q,\pi)$ with timestamp $t$, chain $c\in\mathcal{C}$, source and destination addresses $u,v$, semantic type $y\in\mathcal{Y}$, token $\kappa$, log-scaled amount $q=\log(1+\text{amount})$ and protocol label $\pi$ (empty for plain transfers).
 The type vocabulary is
-\[
-\mathcal{Y}=\{\textsf{transfer},\textsf{swap},\textsf{bridge\_dep},\textsf{bridge\_wdr},\textsf{lend\_dep},\textsf{lend\_wdr},\textsf{split},\textsf{merge},\textsf{mixer/exit},\textsf{other}\}.
-\]
+\begin{align*}
+\mathcal{Y}=\{&\textsf{transfer},\textsf{swap},\textsf{bridge\_dep},\textsf{bridge\_wdr},\textsf{lend\_dep},\\
+&\textsf{lend\_wdr},\textsf{split},\textsf{merge},\textsf{mixer/exit},\textsf{other}\}.
+\end{align*}
 
 \paragraph{Trajectories and prefixes.}
 Starting from a seed address $s$ named in a public incident report (or, for a negative, an address matched to the incident, Sect.~\ref{sec:data}), a trajectory $\tau=(a_1,\dots,a_n)$ is the time-ordered sequence of actions reached by bounded value-flow expansion (Sect.~\ref{sec:traj}).

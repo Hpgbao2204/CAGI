@@ -4,9 +4,9 @@
 %=============================================================================
 
 \paragraph{Incidents.}
-We collected 15 cross-chain DeFi incidents from 2021 to 2025 that are documented by at least one public security source (CertiK, SlowMist, Beosin, BlockSec, PeckShield, Halborn, Chainalysis or Elliptic): 8 on BSC, 5 on Arbitrum and 2 on Ethereum (Appendix~\ref{app:incidents}).
+We collected 15 cross-chain DeFi incidents from 2021 to 2025 that are documented by at least one public security source (CertiK, SlowMist, Beosin, BlockSec, PeckShield, Halborn, Chainalysis or Elliptic): 7 on BSC, 6 on Arbitrum and 2 on Ethereum (Appendix~\ref{app:incidents}).
 The 82-case list of AMLGuard~\cite{wu2026amlguard} was used only to locate candidates; every seed address, start block and exit was verified on-chain by the authors against the public report.
-For 10 incidents the report confirms the exit (bridge, mixer or lending deposit) and the endpoint is defined as in Sect.~\ref{sec:problem}; the other 5 are used for detection but not for lead time.
+For 12 incidents a public report confirms the exit (bridge, mixer or lending deposit); for 10 of them the exit action lies inside our trace and defines the endpoint of Sect.~\ref{sec:problem}. The other incidents are used for detection but not for lead time.
 
 \paragraph{Hard negatives.}
 A detector that separates stolen funds from dormant wallets is useless in practice, because an analyst watching a bridge sees mostly legitimate users.
@@ -19,14 +19,14 @@ Five manually selected controls, one per early incident (for example, a legitima
 Each negative is expanded with exactly the same collector, builder and depth as the incidents.
 
 \paragraph{Collection and completeness.}
-We re-collected all raw data for this paper through the free tiers of Etherscan (Ethereum, Arbitrum) and NodeReal (BSC): \TBD{1.5}\,GB of responses over \TBD{N} API calls.
+We re-collected all raw data for this paper through the free tiers of Etherscan (Ethereum, Arbitrum) and NodeReal (BSC): 43{,}080 cached responses totalling 1.5\,GB.
 A trajectory enters the dataset only if every address it reaches has a complete cache.
 The monthly NodeReal quota ran out before all BSC negatives were collected, so 223 of the 272 BSC negatives in the mining registry are excluded, and for one BSC incident (Paraluni) the trajectory is rebuilt from our earlier decoded trace of the same seed and window, truncated to the same depth.
 No transaction appears in two incident groups; a few infrastructure addresses (routers, pools, exchange wallets) are shared, which cannot leak labels because no feature encodes address identity.
 
 \paragraph{Statistics.}
 Table~\ref{tab:data} summarizes the dataset and Fig.~\ref{fig:data} contrasts incidents with negatives.
-Incident trajectories are longer (median \TBD{40} vs.\ \TBD{3} actions) and richer in swaps and bridge deposits; because raw action counts and prefix length are not model inputs and checkpoints are evaluated separately, length alone cannot explain the results (Sect.~\ref{sec:results}).
+Incident trajectories are longer (median 40 vs.\ 2 actions; 187 negatives consist of a single action) and richer in swaps and bridge deposits; because raw action counts and prefix length are not model inputs and checkpoints are evaluated separately, length alone cannot explain the results (Sect.~\ref{sec:results}).
 
 \begin{table}[t]
 \centering
@@ -38,10 +38,10 @@ Incident trajectories are longer (median \TBD{40} vs.\ \TBD{3} actions) and rich
  & Ethereum & BSC & Arbitrum & Total \\
 \midrule
 Incidents & 2 & 8 & 5 & 15 \\
-Hard negatives & \TBD{} & \TBD{} & \TBD{} & \TBD{393} \\
-Actions & \TBD{} & \TBD{} & \TBD{} & \TBD{11{,}721} \\
-Prefix rows (pooled, deduplicated) & & & & \TBD{1{,}384} \\
-Positive rate of pooled rows & & & & \TBD{8.4\%} \\
+Hard negatives & 117 & 51 & 225 & 393 \\
+Actions & 1{,}262 & 4{,}376 & 6{,}083 & 11{,}721 \\
+Prefix rows (pooled, deduplicated) & & & & 1{,}384 \\
+Positive rate of pooled rows & & & & 8.4\% \\
 \bottomrule
 \end{tabular}
 \end{table}
