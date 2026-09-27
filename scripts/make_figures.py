@@ -1,5 +1,5 @@
 """Draw every experimental figure of the paper (paper/figures/figNx.pdf, one
-PDF per panel) and the appendix incident table from results/tables and
+PDF per panel, all panels the same size) from results/tables and
 data/processed/exp. Figure 1 (architecture) is drawn by hand.
 
     python scripts/make_figures.py
@@ -316,53 +316,8 @@ def fig5_shap():
     save(fig, "fig5d")
 
 
-SHORT_NAME = {
-    "bsc_token_hub_2022": "BSC Token Hub", "chibi_finance_2023": "Chibi Finance", "deltaprime_arbitrum_2024": "DeltaPrime",
-    "feg_bridge_2024": "FEG SmartBridge", "hackerdao_2022": "HackerDAO", "magic_abracadabra_arbitrum_2025": "Abracadabra (MIM)",
-    "new_free_dao_2022": "New Free DAO", "paraluni_2022": "Paraluni", "qbridge_qubit_2022": "Qubit QBridge",
-    "radiant_capital_arbitrum_2024": "Radiant Capital", "ronin_bridge_2022": "Ronin Bridge", "utopiasphere_2024": "UtopiaSphere",
-    "wault_finance_2021": "Wault Finance", "wooppv2_2024": "WOOFi WooPPV2", "xkingdom_2024": "XKingdom",
-}
-
-
-def appendix_table():
-    """Bang su co trong paper/cagi_nss2026.tex (giua 2 marker auto:incident-table) tu metadata + results."""
-    import json
-    reg = pd.read_csv(REPO_ROOT / "metadata" / "incident_registry.csv").set_index("incident_id")
-    inc = csv("incident_table.csv").set_index("incident_id")
-    prov = json.loads((TAB / "dataset_provenance.json").read_text())
-    trajs = {t["source_id"]: t["trajectory"] for t in load("trajectories")}
-    chain = {"eth": "ETH", "bsc": "BSC", "arbitrum": "ARB"}
-    lines = []
-    for i in sorted(inc.index, key=lambda k: trajs[k].actions[0].timestamp):
-        r, t = inc.loc[i], trajs[i]
-        src = "; ".join(str(reg.loc[i, "source_report"]).split(";")[:2]).replace("&", "\\&")
-        ep = r.endpoint_type.replace("_", " ") if isinstance(r.endpoint_type, str) and r.endpoint_type else "--"
-        epi = f"{int(r.endpoint_idx)}" if r.endpoint_idx == r.endpoint_idx else "--"
-        mark = "$^\\dagger$" if prov.get(i) == "original_decoded_trace" else ""
-        lines.append(f"{SHORT_NAME[i]}{mark} & {t.actions[0].timestamp:%Y-%m-%d} & {chain[r.chain]} & "
-                     f"{t.seed_address[:8]}\\ldots & {int(r.n_actions)} & {r.duration_h:.1f} & {ep} ({epi}) & "
-                     f"{int(r.n_negatives)} & {src} \\\\")
-    body = "\n".join(lines)
-    tex = ("\\begin{table}[h]\n\\centering\n\\caption{The 15 incidents. $n$: actions in the trajectory; "
-           "endpoint: type and index $e^\\star$ of the first exit action in the trace (-- if the confirmed exit "
-           "lies outside the traced chain or depth); Neg.: hard negatives with a complete cache. "
-           "$^\\dagger$ rebuilt from our earlier decoded trace (Sect.~\\ref{sec:setup}).}\n"
-           "\\label{tab:incidents}\n\\scriptsize\n\\setlength{\\tabcolsep}{2.5pt}\n"
-           "\\resizebox{\\linewidth}{!}{%\n\\begin{tabular}{@{}ccccccccC{3.0cm}@{}}\n\\toprule\n"
-           "Incident & Start & Chain & Seed & $n$ & Hours & Endpoint ($e^\\star$) & Neg. & Public sources \\\\\n"
-           "\\midrule\n" + body + "\n\\bottomrule\n\\end{tabular}}\n\\end{table}\n")
-    out = REPO_ROOT / "paper" / "cagi_nss2026.tex"
-    begin, end = "% BEGIN auto:incident-table", "% END auto:incident-table"
-    paper = out.read_text()
-    i, j = paper.index(begin), paper.index(end)
-    i = paper.index("\n", i) + 1
-    out.write_text(paper[:i] + tex + paper[j:])
-    print("  ->", out.name, "(incident table)")
-
-
 def main():
-    for f in (fig2, fig3, fig4, fig4_alerts, fig5, fig5_shap, appendix_table):
+    for f in (fig2, fig3, fig4, fig4_alerts, fig5, fig5_shap):
         print(f.__name__)
         f()
 

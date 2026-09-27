@@ -7,6 +7,8 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{tikz}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
 \usepackage{xcolor}
 \usepackage{xurl}
 \usepackage[hidelinks]{hyperref}
@@ -17,13 +19,16 @@
 \newif\ifpending \pendingtrue
 \newcommand{\TBD}[1]{\ifpending\textcolor{red}{\textbf{[TBD: #1]}}\else\errmessage{Unfilled TBD: #1}\fi}
 
-% Every table cell is centred horizontally and vertically.
-\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
+% Table cells: left-aligned and vertically centred.
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}m{#1}}
 \renewcommand{\arraystretch}{1.15}
 % Support marks for the positioning table.
 \DeclareRobustCommand{\full}{\tikz[baseline=-0.6ex]\fill (0,0) circle (0.6ex);}
 \DeclareRobustCommand{\half}{\tikz[baseline=-0.6ex]{\draw[line width=0.4pt] (0,0) circle (0.6ex);\fill (0,-0.6ex) arc (-90:90:0.6ex) -- cycle;}}
 \DeclareRobustCommand{\none}{\tikz[baseline=-0.6ex]\draw[line width=0.4pt] (0,0) circle (0.6ex);}
+\newcommand{\1}{\mathbb{1}}
+\DeclareMathOperator{\logit}{logit}
+\DeclareMathOperator*{\argmin}{arg\,min}
 
 \begin{document}
 
@@ -55,28 +60,25 @@ We release the raw evidence cache, the decoded trajectories and one-command scri
 Cross-chain bridges move assets between heterogeneous ledgers and have become core infrastructure of decentralized finance (DeFi).
 They are also a preferred laundering route.
 Bridge exploits account for many of the largest thefts in the ecosystem~\cite{lee2023sok}, and Elliptic estimates that more than \$21 billion of criminal and high-risk funds had passed through DEXs, bridges and swap services by 2025, a threefold rise over two years~\cite{elliptic2025crosschain}.
-After an exploit, the attacker typically moves the proceeds within hours: fresh intermediary wallets, token swaps into liquid assets, fan-out splits, and finally a bridge deposit, a mixer or an exchange, after which the trail is lost or frozen funds can no longer be recovered.
+After an exploit, the attacker typically moves the proceeds within hours: fresh intermediary wallets, token swaps into liquid assets, fan-out splits, and finally a bridge deposit, a mixer or an exchange, after which the trail is lost.
 MITRE's AADAPT framework names these steps cross-chain hopping, layering, peel chains and anonymizing services~\cite{mitre2025aadapt}.
 
 Research has made steady progress on \emph{reconstructing} such flows.
 CONNECTOR and ABCTracer associate deposits and withdrawals across bridges~\cite{lin2025connector,lin2025abctracer}, BridgeGuard and XChainWatcher detect attack transactions and rule violations on bridges~\cite{wu2025safeguarding,augusto2025xchainwatcher}, and AMLGuard combines semantic transaction analysis with retrieval-augmented language-model reasoning to trace laundering paths on 82 real cases~\cite{wu2026amlguard}.
-These systems answer a forensic question, \emph{where did the money go?}, and they work on complete or nearly complete histories.
-A compliance team, a bridge operator or an exchange facing an incident \emph{while it unfolds} needs a different answer: given only the actions observed so far, is this flow on a laundering path, and how much time is left before it reaches an exit that cannot be undone?
+These systems answer a forensic question, \emph{where did the money go?}, on complete or nearly complete histories.
+A compliance team or a bridge operator facing an incident \emph{while it unfolds} needs a different answer: given only the actions observed so far, is this flow on a laundering path, and how much time is left before it reaches an exit that cannot be undone?
 
-We call this problem \emph{early detection of cross-chain laundering} and study it on real incidents.
+We call this problem \emph{early detection of cross-chain laundering}.
 It differs from forensic tracing in three ways.
-First, the detector sees only a prefix of the trajectory and must score it without any information that depends on how the trajectory ends.
-Second, most prefixes of benign activity look like laundering: a user who bridges, swaps and splits is not a thief, so the detector must be evaluated against benign trajectories that pass through the same bridges at the same time.
-Third, a score is only useful if it is calibrated and explained, because a human decides whether to freeze or escalate.
+The detector sees only a prefix of the trajectory and must not use any information that depends on how the trajectory ends; most prefixes of benign activity look like laundering, so it must be evaluated against benign trajectories that pass through the same bridges at the same time; and its score is only useful if it is calibrated and explained, because a human decides whether to freeze or escalate.
 
-We present \textbf{CAGI-ED} (Cross-chain Attack Graph Intelligence for Early Detection), a CPU-only pipeline that monitors a seed address, decodes every new action into a DeFi semantic type (transfer, swap, bridge, lending, split, merge, mixer or exit), expands the tainted value flow, and re-scores the growing trajectory after each action.
-The scorer uses \emph{typed temporal motifs}, features that describe what kind of actions happened, in which order and how fast, and turns them into a calibrated probability with an explanation in AADAPT terms.
+We present \textbf{CAGI-ED} (Cross-chain Attack Graph Intelligence for Early Detection), a CPU-only pipeline that monitors a seed address, decodes every new action into a DeFi semantic type, expands the tainted value flow, and re-scores the growing trajectory after each action with \emph{typed temporal motifs}, features that describe what kind of actions happened, in which order and how fast.
 In summary, this paper makes the following contributions:
 \begin{itemize}
-\item We formalize prefix-based early detection with an explicit endpoint, lead time and per-trajectory false-alert rate, separate online horizons (available to a live monitor) from relative checkpoints (a retrospective diagnostic), and evaluate under leave-one-incident-out with incident-level bootstrap intervals (Sect.~\ref{sec:problem} and~\ref{sec:experiments}).
-\item We design an end-to-end architecture from multi-chain explorer APIs to explained alerts: an evidence cache with checksums, a semantic decoder over a verified protocol map, a bounded value-flow trajectory builder, 37 prefix-safe features, and a calibrated gradient-boosted scorer with TreeSHAP attributions mapped to MITRE AADAPT (Sect.~\ref{sec:method}).
-\item We rebuild a dataset of 15 publicly documented cross-chain incidents (2021--2025) on Ethereum, BNB Smart Chain and Arbitrum with 393 hard-negative trajectories mined from the same bridges, DEXs and mixers in the same time window, and release the decoded trajectories, the raw evidence cache and all scripts.
-\item We report a controlled study that holds the learner fixed and varies only the representation, together with online horizons from one minute to one day, lead time and false alerts per threshold, ablations, calibration, a mimicry stress test and cost on commodity hardware (Sect.~\ref{sec:experiments}).
+\item We formalize prefix-based early detection with an explicit endpoint, lead time and per-trajectory false-alert rate, and separate online horizons, which a live monitor can use, from relative checkpoints, which are a retrospective diagnostic (Sect.~\ref{sec:problem}).
+\item We design an end-to-end architecture from multi-chain explorer APIs to explained alerts, with a bounded value-flow trajectory builder, 37 prefix-invariant features and a calibrated gradient-boosted scorer whose TreeSHAP attributions are mapped to MITRE AADAPT (Sect.~\ref{sec:method}).
+\item We rebuild a dataset of 15 publicly documented cross-chain incidents (2021--2025) with 393 hard-negative trajectories mined from the same bridges, DEXs and mixers, and release the decoded trajectories, the raw evidence cache and all scripts.
+\item We report a controlled study that holds the learner fixed and varies only the representation, together with online lead time, false alerts, calibration, a mimicry stress test and cost on commodity hardware (Sect.~\ref{sec:experiments}).
 \end{itemize}
 
 %=============================================================================
@@ -98,20 +100,19 @@ Table~\ref{tab:positioning} compares the closest systems; CAGI-ED does not link 
 \caption{Positioning against the closest systems (\full\ supported, \half\ partially supported, \none\ not supported). Dst.: links source and destination legs of a bridge transfer; Path: models multi-step post-exploit flows; Typing: DeFi semantic action types; Online: decides while the activity unfolds; Calib.: calibrated probability; Expl.: human-readable evidence; Scale: evaluated on a large real-world set.}
 \label{tab:positioning}
 \small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{@{}cccccccc@{}}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lllllllll@{}}
 \toprule
-System & Dst. & Path & Typing & Online & Calib. & Expl. & Scale \\
+System & Year & Dst. & Path & Typing & Online & Calib. & Expl. & Scale \\
 \midrule
-DenseFlow~\cite{lin2024denseflow} & \none & \full & \none & \none & \none & \half & \full \\
-CONNECTOR~\cite{lin2025connector} & \full & \none & \half & \none & \none & \half & \full \\
-ABCTracer~\cite{lin2025abctracer} & \full & \none & \half & \none & \none & \half & \full \\
-BridgeGuard~\cite{wu2025safeguarding} & \half & \none & \half & \none & \none & \none & \full \\
-XChainWatcher~\cite{augusto2025xchainwatcher} & \full & \none & \half & \full & \none & \full & \full \\
-AMLGuard~\cite{wu2026amlguard} & \full & \full & \full & \none & \none & \full & \full \\
-CAGI-ED (ours) & \none & \full & \full & \full & \full & \full & \none \\
+DenseFlow~\cite{lin2024denseflow} & 2024 & \none & \full & \none & \none & \none & \half & \full \\
+CONNECTOR~\cite{lin2025connector} & 2025 & \full & \none & \half & \none & \none & \half & \full \\
+ABCTracer~\cite{lin2025abctracer} & 2025 & \full & \none & \half & \none & \none & \half & \full \\
+BridgeGuard~\cite{wu2025safeguarding} & 2025 & \half & \none & \half & \none & \none & \none & \full \\
+XChainWatcher~\cite{augusto2025xchainwatcher} & 2025 & \full & \none & \half & \full & \none & \full & \full \\
+AMLGuard~\cite{wu2026amlguard} & 2026 & \full & \full & \full & \none & \none & \full & \full \\
+CAGI-ED (ours) & 2026 & \none & \full & \full & \full & \full & \full & \none \\
 \bottomrule
-\end{tabular}
+\end{tabular*}
 \end{table}
 
 %=============================================================================
@@ -120,29 +121,49 @@ CAGI-ED (ours) & \none & \full & \full & \full & \full & \full & \none \\
 %=============================================================================
 
 Let $\mathcal{C}=\{\text{Ethereum},\text{BSC},\text{Arbitrum}\}$.
-A decoded action is a tuple $a=(t,c,u,v,y,\kappa,q,\pi)$ with timestamp $t$, chain $c\in\mathcal{C}$, source and destination addresses $u,v$, semantic type $y\in\mathcal{Y}$, token $\kappa$, log-scaled amount $q=\log(1+\text{amount})$ and protocol label $\pi$ (empty for plain transfers).
+A decoded action is a tuple $a=(t,c,u,v,y,\kappa,q,\pi)$ with timestamp $t$, chain $c\in\mathcal{C}$, source and destination addresses $u,v$, semantic type $y\in\mathcal{Y}$, token $\kappa$, log-scaled amount $q=\log(1+\text{amount})$ and protocol label $\pi$.
 The type vocabulary is
 \begin{align*}
 \mathcal{Y}=\{&\textsf{transfer},\textsf{swap},\textsf{bridge\_dep},\textsf{bridge\_wdr},\textsf{lend\_dep},\\
 &\textsf{lend\_wdr},\textsf{split},\textsf{merge},\textsf{mixer/exit},\textsf{other}\}.
 \end{align*}
-Starting from a seed address $s$ named in a public incident report (or, for a negative, an address matched to the incident), a trajectory $\tau=(a_1,\dots,a_n)$ is the time-ordered sequence of actions reached by bounded value-flow expansion (Eq.~\eqref{eq:builder}).
-The prefix of length $k$ is $\tau_{1:k}=(a_1,\dots,a_k)$; at wall-clock time $t$ the monitor has observed $\tau_{1:k(t)}$ with $k(t)=|\{i: t_i\le t\}|$.
 
-For an incident trajectory whose exit is confirmed by a public source, the endpoint index $e^\star$ is the first action whose type is \textsf{bridge\_dep}, \textsf{lend\_dep} or \textsf{mixer/exit}, i.e.\ the first step after which the funds leave the monitored chain or enter a pool that breaks the trace; $t_e=t_{e^\star}$.
-A detector outputs $\hat p_k=\Pr(\text{laundering}\mid\tau_{1:k})$ from $a_1,\dots,a_k$ only.
-Given a threshold $\theta$, the first alert is at $k_a=\min\{k\ge2:\hat p_k\ge\theta\}$ and
+\begin{definition}[Trajectory and prefix]
+Given a seed address $s$, a trajectory $\tau=(a_1,\dots,a_n)$ is the time-ordered sequence of actions reached from $s$ by bounded value-flow expansion (Alg.~\ref{alg:builder}).
+Its prefix of length $k$ is $\tau_{1:k}=(a_1,\dots,a_k)$, and at wall-clock time $t$ a monitor has observed $\tau_{1:k(t)}$ with $k(t)=|\{i: t_i\le t\}|$.
+\end{definition}
+
+For an incident trajectory whose exit is confirmed by a public source, the endpoint is the first action that moves the funds off the monitored chain or into a pool that breaks the trace,
+\begin{equation}
+e^\star=\min\{i: y_i\in\mathcal{Y}_{\mathrm{exit}}\},\qquad t_e=t_{e^\star},
+\label{eq:endpoint}
+\end{equation}
+with $\mathcal{Y}_{\mathrm{exit}}=\{\textsf{bridge\_dep},\textsf{lend\_dep},\textsf{mixer/exit}\}$.
+
+\begin{definition}[Early warning]
+A detector maps each prefix to a score $\hat p_k=g(\tau_{1:k})\approx\Pr(\text{laundering}\mid\tau_{1:k})$ that depends on $a_1,\dots,a_k$ only.
+For a threshold $\theta$, the first alert is at $k_a=\min\{k\ge2:\hat p_k\ge\theta\}$, and
 \begin{equation}
 \text{lead time}=t_e-t_{k_a},\qquad \text{lead steps}=e^\star-k_a .
 \label{eq:lead}
 \end{equation}
-An alert with $k_a\ge e^\star$ is \emph{late}; late alerts are counted separately and never enter lead-time statistics.
-An alert on a negative trajectory at any $k$ is a false alert, so false-alert rates are per trajectory, not per prefix.
+The alert is \emph{early} if $k_a<e^\star$ and \emph{late} otherwise; late alerts never enter lead-time statistics.
+\end{definition}
 
+Let $\mathcal{P}_e$ be the incidents with a confirmed endpoint inside the trace and $\mathcal{N}_{\ge2}$ the negative trajectories with at least two actions.
+We measure early warning by the early-detection and false-alert rates
+\begin{equation}
+\begin{aligned}
+\mathrm{EDR}(\theta)&=\frac{1}{|\mathcal{P}_e|}\,\bigl|\{\tau\in\mathcal{P}_e: k_a(\tau)<e^\star(\tau)\}\bigr|,\\
+\mathrm{FAR}(\theta)&=\frac{1}{|\mathcal{N}_{\ge2}|}\,\bigl|\{\tau\in\mathcal{N}_{\ge2}: \exists k\ge2,\ \hat p_k(\tau)\ge\theta\}\bigr|,
+\end{aligned}
+\label{eq:rates}
+\end{equation}
+so that a false alert is counted once per benign trajectory, not once per prefix.
 We evaluate two families of prefixes.
-\emph{Online horizons} $k(t_1+h)$ for $h\in\{1\,\text{min},\dots,24\,\text{h}\}$ are available to a live monitor.
-\emph{Relative checkpoints} $k=\lceil r n\rceil$, $r\in\{25,50,75,100\}\%$, require the final length $n$ and are therefore a retrospective diagnostic only; they are never used as a model input.
-The adversary controls pseudonymous addresses holding stolen or illicit funds and may use any public bridge, DEX, lending market or mixer.
+\emph{Online horizons} $k(t_1+h)$ for $h\in\{1\,\text{min},\dots,24\,\text{h}\}$ are available to a live monitor, whereas \emph{relative checkpoints} $k=\lceil r n\rceil$, $r\in\{25,50,75,100\}\%$, require the final length $n$ and are a retrospective diagnostic only.
+
+The adversary controls pseudonymous addresses holding stolen funds and may use any public bridge, DEX, lending market or mixer.
 The defender knows one seed address from a public report and observes public chain data only.
 Breaking mixer anonymity, discovering incidents by whole-chain scanning, and attributing real-world identities are out of scope.
 
@@ -151,7 +172,8 @@ Breaking mixer anonymity, discovering incidents by whole-chain scanning, and att
 \label{sec:method}
 %=============================================================================
 
-Figure~\ref{fig:arch} shows the four layers of CAGI-ED: a multi-chain collector with an evidence cache, a semantic decoder that turns raw transfers into typed actions, a trajectory builder that follows tainted value from the seed, and an online scorer that recomputes prefix features on every new action, calibrates the score and emits an explained alert.
+Figure~\ref{fig:arch} shows the four layers of CAGI-ED: a multi-chain collector with an evidence cache, a semantic decoder, a trajectory builder, and an online scorer that emits an explained alert.
+Algorithm~\ref{alg:builder} builds the trajectory and Algorithm~\ref{alg:monitor} runs the online monitor.
 
 \begin{figure}[t]
 \centering
@@ -160,43 +182,76 @@ Figure~\ref{fig:arch} shows the four layers of CAGI-ED: a multi-chain collector 
 \label{fig:arch}
 \end{figure}
 
-For Ethereum and Arbitrum the collector calls the Etherscan V2 account endpoints (normal, internal and ERC-20 transactions) with block-range pagination; for BSC it calls NodeReal's \texttt{nr\_getAssetTransfers} in both directions.
-Every response is stored verbatim with its request time and SHA-256 checksum under \emph{(chain, address, incident)}, so two incidents that touch the same infrastructure never overwrite each other's evidence and every feature value can be traced back to the bytes it was computed from.
-The collection window is $[b_0, b_0+72\,\text{h}]$ from the incident's start block $b_0$.
+\subsection{Collection, Decoding and Trajectory Building}
+\label{sec:traj}
 
-The decoder relies on a protocol map of contracts whose role was verified on-chain (by event signature or function selector) or in explorer labels: 9 bridge endpoints of 8 families, 6 DEX routers and pools, 2 mixers and 1 lending market.
-Each raw leg becomes a canonical action; legs of the same transaction are then merged into one semantic action when the structure is unambiguous: two or more tokens moving in and out of the same address form a \textsf{swap}; one source paying two or more destinations forms a \textsf{split}; two or more sources paying one destination form a \textsf{merge}.
-A deposit to a verified bridge (lending market, mixer) becomes \textsf{bridge\_dep} (\textsf{lend\_dep}, \textsf{mixer/exit}) regardless of the merge rule, and duplicate legs returned by overlapping pages are removed on (chain, transaction hash, log index).
+For Ethereum and Arbitrum the collector calls the Etherscan V2 account endpoints (normal, internal and ERC-20 transactions); for BSC it calls NodeReal's \texttt{nr\_getAssetTransfers} in both directions.
+Every response is stored verbatim with its request time and SHA-256 checksum under the key \emph{(chain, address, incident)}, so every feature value can be traced back to the bytes it was computed from.
 
-The trajectory builder follows the tainted value from the seed.
-Let $A$ be the decoded actions of the processed addresses inside the window, sorted by time, let $\rho(a)=\mathrm{e}^{q}-1$ recover the raw amount, and write $O(u,\kappa)=\sum_{a\in A:\,u_a=u,\kappa_a=\kappa}\rho(a)$ for the outflow of source $u$ in token $\kappa$.
-The builder keeps a depth map $d(\cdot)$ with $d(s)=0$ and accepts action $a$ iff
+The decoder relies on a protocol map $\mathcal{P}$ of contracts whose role was verified on-chain (by event signature or function selector) or in explorer labels: 9 bridge endpoints of 8 families, 6 DEX routers and pools, 2 mixers and 1 lending market.
+Legs of one transaction are merged into a single action when the structure is unambiguous: tokens moving in and out of the same address form a \textsf{swap}, one source paying two or more destinations forms a \textsf{split}, and two or more sources paying one destination form a \textsf{merge}; a deposit to a verified bridge, lending market or mixer becomes \textsf{bridge\_dep}, \textsf{lend\_dep} or \textsf{mixer/exit}.
+
+The builder follows the tainted value from $s$.
+With $\rho(a)=\mathrm{e}^{q_a}-1$ the raw amount and $O(u,\kappa)=\sum_{a\in A:\,u_a=u,\,\kappa_a=\kappa}\rho(a)$ the outflow of source $u$ in token $\kappa$, it keeps a depth map $d(\cdot)$ with $d(s)=0$ and accepts an action $a$ iff
 \begin{equation}
-d(u_a)<D,\qquad t_a-t_1\le H,\qquad \frac{\rho(a)}{O(u_a,\kappa_a)}\ge\eta \;\;\lor\;\; \{u_a,v_a\}\cap\mathcal{P}\neq\emptyset,
+d(u_a)<D\ \wedge\ t_a-t_1\le H\ \wedge\ \Bigl(\frac{\rho(a)}{O(u_a,\kappa_a)}\ge\eta\ \vee\ \{u_a,v_a\}\cap\mathcal{P}\neq\emptyset\Bigr),
 \label{eq:builder}
 \end{equation}
-where $\mathcal{P}$ is the set of verified protocol contracts; on acceptance $d(v_a)\leftarrow\min(d(v_a),d(u_a)+1)$ unless $v_a\in\mathcal{P}$, so the expansion never walks \emph{through} shared infrastructure.
-The collector then fetches the new frontier $\{v_a\}\setminus\mathcal{P}$ and the builder is re-run until the frontier is empty.
-We use $D=6$ hops, $H=72$\,h, $\eta=5\%$ and two frontier-expansion rounds, identical for incidents and negatives.
-The value share is computed per token so that a large stablecoin payment is not diluted by a small ETH fee.
-Traces are followed on the incident's primary chain; the continuation on the destination chain of a bridge deposit is not stitched into the trajectory, because the reports we rely on confirm the exit but seldom give the destination address, which makes a bridge deposit a natural endpoint.
+and then sets $d(v_a)\leftarrow\min(d(v_a),d(u_a)+1)$ unless $v_a\in\mathcal{P}$, so the expansion never walks \emph{through} shared infrastructure.
+The share is computed per token so that a large stablecoin payment is not diluted by a small ETH fee.
+We use $D=6$, $H=72$\,h, $\eta=5\%$ and $R=2$ frontier-expansion rounds, identical for incidents and negatives.
+Traces stay on the incident's primary chain, which makes a bridge deposit a natural endpoint.
 
-For each prefix the extractor computes $\mathbf{x}(\tau_{1:k})$ from $a_1,\dots,a_k$ only (37 model inputs).
-A unit test enforces this: two trajectories that share the first $k$ actions but differ afterwards, in content or in length, must yield identical features at $k$.
-The same test caught a relative-position feature $k/n$ in an earlier version of the code, whose denominator is the final length; it is removed.
-The 14 \emph{flat} features cover tempo (mean and standard deviation of inter-action gaps, burstiness $B=(\sigma_\delta-\mu_\delta)/(\sigma_\delta+\mu_\delta)$, active duration), structure (fan-out and fan-in of the seed, distinct counterparties, edge density, maximum hop depth, branching addresses) and value (mean log amount, out/in ratio, value retention $q_k/q_1$, tokens holding at least 1\% of the value).
-The 16 \emph{typed-action} features are the share of each type in $\mathcal{Y}$, the number of distinct type bigrams and trigrams, distinct bridge families, bridge$\to$swap transitions, stablecoin legs and the time to the first bridge action; raw counts are not used because they sum to $k$.
-The 7 \emph{motifs} are counted only when complete within the prefix: split, merge, peel chain (a run of $\ge3$ transfers with $v_{i-1}=u_i$ and $q_i\le q_{i-1}$), bridge$\to$swap, swap$\to$split, nested bridge and rapid token pivot.
-The flat group is exactly the information a type-agnostic transaction graph offers; the other two groups require the decoder.
-Table~\ref{tab:aadapt} maps the observables to MITRE AADAPT techniques~\cite{mitre2025aadapt} so that an alert can be phrased in a responder's vocabulary.
+\begin{algorithm}[t]
+\caption{Bounded value-flow trajectory builder}
+\label{alg:builder}
+\begin{algorithmic}[1]
+\Require seed $s$, protocol map $\mathcal{P}$, depth $D$, horizon $H$, share $\eta$, rounds $R$
+\State $\mathcal{F}\gets\{s\}$;\ \ $\mathcal{E}\gets\emptyset$ \Comment{frontier, cached evidence}
+\For{$r=1,\dots,R$}
+  \State $\mathcal{E}\gets\mathcal{E}\cup\textsc{Collect}(\mathcal{F})$ \Comment{explorer API, SHA-256 cache}
+  \State $A\gets\textsc{Decode}(\mathcal{E},\mathcal{P})$ sorted by time;\ \ $d\gets\{s\mapsto0\}$;\ \ $\tau\gets()$
+  \For{$a\in A$ with $u_a\in\operatorname{dom}(d)$}
+    \If{$a$ satisfies Eq.~\eqref{eq:builder}}
+      \State append $a$ to $\tau$
+      \If{$v_a\notin\mathcal{P}$} $d(v_a)\gets\min\bigl(d(v_a),d(u_a)+1\bigr)$ \EndIf
+    \EndIf
+  \EndFor
+  \State $\mathcal{F}\gets\operatorname{dom}(d)\setminus\{\text{addresses already collected}\}$
+  \If{$\mathcal{F}=\emptyset$} \textbf{break} \EndIf
+\EndFor
+\State \Return $\tau$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Prefix-Invariant Features}
+\label{sec:features}
+
+For each prefix the extractor computes a vector $\mathbf{x}(\tau_{1:k})\in\mathbb{R}^{37}$ that satisfies
+\begin{equation}
+\tau_{1:k}=\tau'_{1:k}\ \Longrightarrow\ \mathbf{x}(\tau_{1:k})=\mathbf{x}(\tau'_{1:k}),
+\label{eq:invariance}
+\end{equation}
+i.e.\ two trajectories that share their first $k$ actions but differ afterwards, in content or in length, yield identical features; a unit test enforces this property and caught a length-leaking feature $k/n$ in an earlier version of the code.
+With gaps $\delta_i=t_i-t_{i-1}$, their mean $\mu_\delta$ and standard deviation $\sigma_\delta$, three representative features of the three groups are
+\begin{equation}
+B=\frac{\sigma_\delta-\mu_\delta}{\sigma_\delta+\mu_\delta},\qquad
+r_y(\tau_{1:k})=\frac1k\sum_{i=1}^{k}\1[y_i=y],\qquad
+\pi(\tau_{1:k})=\sum_{i=2}^{k}\1[\kappa_i\neq\kappa_{i-1}].
+\label{eq:features}
+\end{equation}
+
+The 14 \emph{flat} features cover tempo (burstiness $B$, $\mu_\delta$, $\sigma_\delta$, active duration $t_k-t_1$), structure (fan-out and fan-in of $s$, counterparties, edge density, hop depth, branching addresses) and value (mean $q$, out/in ratio, retention $q_k/q_1$, tokens holding at least 1\% of the value); they are exactly what a type-agnostic transaction graph offers.
+The 16 \emph{typed-action} features are the shares $r_y$ for $y\in\mathcal{Y}$, the number of distinct type bigrams $|\{(y_{i-1},y_i)\}_{i\le k}|$ and trigrams, distinct bridge families, bridge$\to$swap transitions, stablecoin legs and the time to the first bridge action; shares replace raw counts because counts sum to $k$.
+The 7 \emph{motifs} are counted only when complete within the prefix: split, merge, peel chain (a run of $\ge3$ transfers with $v_{i-1}=u_i$ and $q_i\le q_{i-1}$), bridge$\to$swap, swap$\to$split, nested bridge and the rapid token pivot $\pi$.
+Table~\ref{tab:aadapt} maps these observables to MITRE AADAPT techniques~\cite{mitre2025aadapt}.
 
 \begin{table}[t]
 \centering
 \caption{CAGI-ED observables mapped to MITRE AADAPT techniques.}
 \label{tab:aadapt}
 \small
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}cC{3.6cm}C{5.0cm}@{}}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lL{3.5cm}L{5.2cm}@{}}
 \toprule
 AADAPT ID & Technique & CAGI-ED observable \\
 \midrule
@@ -207,53 +262,83 @@ ADT3028.003 & Layering & swap share, rapid token pivot, bigram diversity \\
 ADT3028.005 & Peel Chains & peel chain, value retention \\
 ADT3030 & Use Anonymizing Services & mixer/exit action (endpoint) \\
 \bottomrule
-\end{tabular}
+\end{tabular*}
 \end{table}
 
-The scorer $f$ is a gradient-boosted tree ensemble (XGBoost~\cite{chen2016xgboost}, 200 trees of depth 4, learning rate 0.1, class weight $n_-/n_+$ computed on the training fold), fixed before any experiment and never tuned on the evaluation data.
-Inside each training fold, features present in fewer than two positive incidents are dropped, so a feature cannot memorize one incident.
-Raw scores are mapped to probabilities by Platt scaling~\cite{niculescu2005calibration},
+\subsection{Calibrated Scoring and Explained Alerts}
+\label{sec:scoring}
+
+The scorer is an additive ensemble of $T=200$ regression trees of depth 4 (XGBoost~\cite{chen2016xgboost}, learning rate 0.1), $F(\mathbf{x})=\sum_{t=1}^{T}f_t(\mathbf{x})$ with $f(\mathbf{x})=\sigma(F(\mathbf{x}))$, trained on the prefix rows $(\mathbf{x}_i,y_i)$ of the training fold by minimizing
 \begin{equation}
-\hat p_k=\sigma\!\bigl(\alpha\,\mathrm{logit}\,f(\mathbf{x}(\tau_{1:k}))+\beta\bigr),
+\mathcal{L}=\sum_i w_i\,\ell\bigl(y_i,F(\mathbf{x}_i)\bigr)+\sum_{t=1}^{T}\Omega(f_t),\qquad w_i=\begin{cases}n_-/n_+ & y_i=1\\ 1 & y_i=0\end{cases}
+\label{eq:xgb}
+\end{equation}
+where $\ell$ is the logistic loss, $\Omega$ the usual penalty on the number and weights of leaves, and $n_+,n_-$ the positive and negative row counts of the fold.
+The hyperparameters were fixed before any experiment, and features present in fewer than two positive incidents of a training fold are dropped so that a feature cannot memorize one incident.
+
+Raw scores are overconfident, so they are mapped to probabilities by Platt scaling~\cite{niculescu2005calibration},
+\begin{equation}
+\begin{aligned}
+\hat p_k&=\sigma\bigl(\alpha\,z_k+\beta\bigr),\qquad z_k=\logit f(\mathbf{x}(\tau_{1:k})),\\
+(\alpha,\beta)&=\argmin_{\alpha,\beta}\ -\sum_i\Bigl[y_i\log\sigma(\alpha z_i+\beta)+(1-y_i)\log\bigl(1-\sigma(\alpha z_i+\beta)\bigr)\Bigr],
+\end{aligned}
 \label{eq:platt}
 \end{equation}
-with $(\alpha,\beta)$ fitted on out-of-fold scores of the training incidents only.
-When $\hat p_k\ge\theta$ for the first time, the alert carries the $k$ with the largest exact TreeSHAP contributions~\cite{lundberg2020treeshap} $\phi_j(\mathbf{x})$, where $\mathrm{logit}\,f(\mathbf{x})=\phi_0+\sum_j\phi_j(\mathbf{x})$, together with the AADAPT IDs of their features.
-Because features are recomputed from the prefix, scoring is stateless and can be repeated on every block.
+where the $z_i$ are inner out-of-fold scores of the training incidents only.
+When $\hat p_k\ge\theta$ for the first time, the alert carries the $m$ largest exact TreeSHAP contributions~\cite{lundberg2020treeshap} of the decomposition $F(\mathbf{x})=\phi_0+\sum_{j}\phi_j(\mathbf{x})$, together with the AADAPT IDs of their features.
+Because of Eq.~\eqref{eq:invariance}, scoring is stateless and can be repeated on every block (Alg.~\ref{alg:monitor}).
+
+\begin{algorithm}[t]
+\caption{Online early-warning monitor}
+\label{alg:monitor}
+\begin{algorithmic}[1]
+\Require seed $s$, model $F$, Platt parameters $(\alpha,\beta)$, threshold $\theta$, explanation size $m$
+\State $k_{\mathrm{done}}\gets1$
+\For{each new block on the source chain}
+  \State $\tau\gets$ \Call{BuildTrajectory}{$s$} \Comment{Alg.~\ref{alg:builder} on the updated cache}
+  \For{$k=k_{\mathrm{done}}+1,\dots,|\tau|$}
+    \State $\mathbf{x}\gets\mathbf{x}(\tau_{1:k})$;\ \ $\hat p_k\gets\sigma\bigl(\alpha F(\mathbf{x})+\beta\bigr)$ \Comment{Eq.~\eqref{eq:platt}}
+    \If{$\hat p_k\ge\theta$}
+      \State $J\gets$ indices of the $m$ largest $\phi_j(\mathbf{x})$ \Comment{TreeSHAP}
+      \State \Return \textsc{Alert}$\bigl(k,\hat p_k,J,\textsc{AADAPT}(J)\bigr)$ \Comment{notify the analyst}
+    \EndIf
+  \EndFor
+  \State $k_{\mathrm{done}}\gets|\tau|$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
 
 %=============================================================================
 \section{Experimental Evaluation}
 \label{sec:experiments}
 %=============================================================================
 
-We ask four research questions.
-\textbf{RQ1}: does typing the actions and adding motifs improve detection over a type-agnostic view of the same flow?
-\textbf{RQ2}: how early can laundering be detected, measured by online horizon, lead time before the endpoint and false alerts on hard negatives?
-\textbf{RQ3}: are the scores calibrated and explainable, and how robust are they to ablations and mimicry?
-\textbf{RQ4}: is the pipeline practical on commodity hardware?
+We answer three research questions.
+\textbf{RQ1}: does typing DeFi actions improve laundering detection over a type-agnostic representation of the same flow?
+\textbf{RQ2}: how long before the laundering exit can CAGI-ED alert, and at what false-alert rate?
+\textbf{RQ3}: are the alerts calibrated, explainable, robust to mimicry and cheap enough to run online?
 
 \subsection{Dataset and Protocol}
 \label{sec:setup}
 
-We collected 15 cross-chain DeFi incidents from 2021 to 2025 that are documented by at least one public security source (CertiK, SlowMist, Beosin, BlockSec, PeckShield, Halborn, Chainalysis or Elliptic), listed in Appendix~\ref{app:incidents}.
-The 82-case list of AMLGuard~\cite{wu2026amlguard} was used only to locate candidates; every seed address, start block and exit was verified on-chain against the public report.
-For 12 incidents a public report confirms the exit (bridge, mixer or lending deposit); for 10 of them the exit action lies inside our trace and defines the endpoint, and the others are used for detection but not for lead time.
-A detector that separates stolen funds from dormant wallets is useless in practice, because an analyst watching a bridge sees mostly legitimate users, so we mine hard negatives from the \emph{same} protocols and time window as each incident.
-For each incident we collect every counterparty of the verified bridge, DEX and mixer contracts on its trace within $\pm7$ days and accept it if it interacted directly with the contract, moved a positive value, did not fan out to more than three addresses and made no mixer deposit after a non-mixer interaction; a second pass targets complex benign activity with a minimum number of raw events, and five manually selected controls (for example, a legitimate Ronin withdrawal followed by a swap in the same hour) complete the set.
-Seeds of all incidents and the 82 AMLGuard addresses are excluded, and every negative is expanded with exactly the same collector, builder and depth as the incidents.
+We collected 15 cross-chain DeFi incidents from 2021 to 2025 documented by at least one public security source (CertiK, SlowMist, Beosin, BlockSec, PeckShield, Halborn, Chainalysis or Elliptic).
+The 82-case list of AMLGuard~\cite{wu2026amlguard} was used only to locate candidates; every seed address, start block and exit was verified on-chain against the public report, and the full registry is released with the artifact.
+For 12 incidents a public report confirms the exit, and for 10 of them the exit action lies inside our trace and defines $e^\star$.
 
-All raw data were re-collected through the free tiers of Etherscan and NodeReal (43{,}080 cached responses, 1.5\,GB), and a trajectory enters the dataset only if every address it reaches has a complete cache.
-The monthly NodeReal quota ran out before all BSC negatives were collected, so 223 of the 272 BSC candidates are excluded, and one BSC incident (Paraluni) is rebuilt from our earlier decoded trace of the same seed and window.
-No transaction appears in two incident groups, and no feature encodes address identity.
-Table~\ref{tab:data} and Fig.~\ref{fig:data} summarize the data: incident trajectories are longer (median 40 vs.\ 2 actions; 187 negatives consist of a single action) and richer in swaps and bridge deposits, but raw counts and prefix length are not model inputs.
-We also release a synthetic benchmark, CAGI-Synth, generated from five laundering typologies and six benign behaviours with a difficulty knob; it is reported separately and is never used as evidence for a claim about real data.
+Hard negatives come from the \emph{same} protocols and time window as each incident, because an analyst watching a bridge sees mostly legitimate users.
+For each incident we collect every counterparty of the verified bridge, DEX and mixer contracts on its trace within $\pm7$ days and keep it if it interacted directly with the contract, moved a positive value, fanned out to at most three addresses and made no mixer deposit after a non-mixer interaction; a second pass adds complex benign activity, and five manual controls complete the set.
+Every negative is expanded by Alg.~\ref{alg:builder} with exactly the same parameters as the incidents.
+
+All raw data were re-collected through the free tiers of Etherscan and NodeReal (43{,}080 cached responses, 1.5\,GB), and a trajectory is kept only if every address it reaches has a complete cache.
+The NodeReal quota ran out before all BSC negatives were collected, so 223 of 272 BSC candidates are excluded, and one BSC incident (Paraluni) is rebuilt from our earlier decoded trace of the same seed and window.
+Table~\ref{tab:data} and Fig.~\ref{fig:data} summarize the data: incident trajectories are longer (median 40 vs.\ 2 actions) and richer in swaps and bridge deposits, but raw counts and prefix length are not model inputs.
 
 \begin{table}[t]
 \centering
 \caption{Real-data statistics. Prefix rows are extracted at $k\in\{2,3,5,7\}$ and at 25/50/75/100\% of each trajectory; duplicates of the same (trajectory, $k$) are pooled once.}
 \label{tab:data}
 \small
-\begin{tabular}{@{}ccccc@{}}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lllll@{}}
 \toprule
  & Ethereum & BSC & Arbitrum & Total \\
 \midrule
@@ -263,7 +348,7 @@ Actions & 1{,}262 & 4{,}376 & 6{,}083 & 11{,}721 \\
 Prefix rows (pooled, deduplicated) & -- & -- & -- & 1{,}384 \\
 Positive rate of pooled rows & -- & -- & -- & 8.4\% \\
 \bottomrule
-\end{tabular}
+\end{tabular*}
 \end{table}
 
 \begin{figure}[t]
@@ -283,24 +368,33 @@ Positive rate of pooled rows & -- & -- & -- & 8.4\% \\
 \end{figure}
 
 We compare seven detectors.
-B0 predicts the training prevalence; B1 is a hand-weighted typology score over motif counts that needs no training; B2 is logistic regression on the action-type shares; B3 is a random forest on the 14 flat features; B3$'$ is \emph{the same XGBoost learner as M1}, with the same hyperparameters, class weighting, coverage filter and seed, on the 14 flat features, so that M1 and B3$'$ differ only in the representation; S1 is a GRU over the last 64 typed tokens of the prefix (action type combined with a log-scale gap bucket); and M1 is CAGI-ED's scorer on all 37 features.
-We do not re-run CONNECTOR or ABCTracer, because they output matched transaction pairs, not laundering probabilities.
-All results use leave-one-incident-out (LOIO): in each of the 15 folds, the incident and all negatives mined for it are held out and every model, calibrator and feature filter is fitted on the other 14 groups.
-The primary metric is pooled out-of-fold PR-AUC (average precision), appropriate at an 8\% positive rate, and we also report the mean of per-incident PR-AUC.
-Uncertainty is estimated by an incident-level bootstrap (2{,}000 resamples of the 15 groups, seed 42), because prefix rows of one incident are dependent; paired comparisons recompute both detectors on the same resampled incidents, with two-sided $p=2\min(\Pr[\Delta^*\le0],\Pr[\Delta^*\ge0])$.
-Feature choices made after seeing earlier results are re-examined by a nested LOIO in which the choice is made inside each training split.
-Everything runs with Python~3.11, scikit-learn, XGBoost and PyTorch on a 4-core Intel Xeon (2.1\,GHz, 16\,GB RAM) without a GPU, and every number is produced by one script from one commit.
+B0 predicts the training prevalence, B1 is a hand-weighted typology score over motif counts, B2 is logistic regression on the type shares $r_y$, B3 is a random forest on the 14 flat features, and S1 is a GRU over the last 64 typed tokens of the prefix.
+B3$'$ is \emph{the same XGBoost learner as M1}, with the same hyperparameters, weighting, filter and seed, on the 14 flat features, so that M1 (all 37 features) and B3$'$ differ only in the representation.
 
-\subsection{RQ1: Does the Typed Representation Help?}
+All results use leave-one-incident-out (LOIO): with $\mathcal{G}=\{g_1,\dots,g_{15}\}$ the incident groups, each consisting of an incident and the negatives mined for it, fold $g$ fits every model, calibrator and feature filter on $\mathcal{D}\setminus\mathcal{D}_g$ and scores $\mathcal{D}_g$.
+The primary metric is pooled out-of-fold average precision,
+\begin{equation}
+\mathrm{AP}=\sum_{j}(R_j-R_{j-1})\,P_j ,
+\label{eq:ap}
+\end{equation}
+where $P_j$ and $R_j$ are precision and recall at the $j$-th score threshold; we also report its mean over incidents.
+Because prefix rows of one incident are dependent, uncertainty comes from an incident-level bootstrap: for $b=1,\dots,2000$ we draw $\mathcal{G}^{*}_b$ from $\mathcal{G}$ with replacement and report the 2.5 and 97.5 percentiles of $\mathrm{AP}(\mathcal{D}_{\mathcal{G}^*_b})$.
+For two detectors $A$ and $B$ we compute $\Delta^*_b=\mathrm{AP}_A(\mathcal{D}_{\mathcal{G}^*_b})-\mathrm{AP}_B(\mathcal{D}_{\mathcal{G}^*_b})$ on the same resample and the two-sided $p=2\min\bigl(\Pr[\Delta^*\le0],\Pr[\Delta^*\ge0]\bigr)$.
+Everything runs on a 4-core Intel Xeon (2.1\,GHz, 16\,GB RAM) without a GPU, and every number is produced by one script from one commit.
+
+\subsection{RQ1: Does Typing DeFi Actions Improve Laundering Detection over a Type-Agnostic Representation?}
 \label{sec:rq1}
 
-Table~\ref{tab:rq1} and Fig.~\ref{fig:rq1} report pooled out-of-fold PR-AUC over all prefixes.
+Table~\ref{tab:rq1} and Fig.~\ref{fig:rq1} report pooled PR-AUC over all prefixes.
 All learned detectors are far above the prevalence floor (0.054).
-M1 reaches 0.479 [0.278, 0.759]; it is clearly better than the typology score B1 ($+0.268$, $p=0.010$) and than bag-of-actions B2 ($+0.363$, $p=0.003$), and above the GRU S1 (0.368), although that gap is not significant ($p=0.29$).
-The comparison that isolates the representation is M1 against B3$'$, the same learner on flat features.
+M1 reaches 0.479 [0.278, 0.759]: it is clearly better than the typology score B1 ($+0.268$, $p=0.010$) and bag-of-actions B2 ($+0.363$, $p=0.003$), and above the GRU S1 (0.368, $p=0.29$).
+
+The comparison that isolates the representation is M1 against B3$'$.
 Over all prefixes B3$'$ is slightly higher (0.518), but the paired difference, $-0.038$ [$-0.139$, $+0.067]$, $p=0.68$, is small relative to its uncertainty, and adding typed-action or motif groups to the flat set changes pooled PR-AUC by $-0.063$ and $-0.018$ (both $p>0.3$, Fig.~\ref{fig:3b}).
-The mean of per-incident PR-AUC, which weights incidents equally, ranks M1 first (0.708 vs.\ 0.628 for B3$'$): M1 is ahead on FEG (1.00 vs.\ 0.22, all nine actions are mixer deposits), WOOFi and BSC Token Hub, and behind on Paraluni, Ronin and DeltaPrime, and the per-incident gap does not correlate significantly with trajectory length (Spearman $\rho=-0.41$, $p=0.17$, $n=13$).
-Over all prefixes, typing and motifs therefore neither help nor hurt significantly at $N=15$; where they help is at the earliest prefixes (RQ2).
+
+Weighting incidents equally reverses the order: the mean of per-incident PR-AUC is 0.708 for M1 and 0.628 for B3$'$.
+M1 is ahead on FEG (1.00 vs.\ 0.22, all nine actions are mixer deposits), WOOFi and BSC Token Hub and behind on Paraluni, Ronin and DeltaPrime, and the per-incident gap does not correlate with trajectory length (Spearman $\rho=-0.41$, $p=0.17$).
+Over all prefixes, typing therefore neither helps nor hurts significantly at $N=15$; RQ2 shows where it helps.
 
 \begin{table}[t]
 \centering
@@ -309,7 +403,7 @@ Over all prefixes, typing and motifs therefore neither help nor hurt significant
 \small
 \setlength{\tabcolsep}{4pt}
 \resizebox{\linewidth}{!}{%
-\begin{tabular}{@{}ccccc@{}}
+\begin{tabular}{@{}lllll@{}}
 \toprule
 ID & Detector & Pooled PR-AUC [95\% CI] & Mean/incident & M1 $-$ X ($p$) \\
 \midrule
@@ -342,39 +436,41 @@ S1 & GRU over typed action tokens & 0.368 [0.221, 0.583] & 0.516 & $+0.111$ (0.2
 \label{fig:rq1}
 \end{figure}
 
-\subsection{RQ2: How Early?}
+\subsection{RQ2: How Long before the Laundering Exit Can CAGI-ED Alert, and at What False-Alert Rate?}
 \label{sec:rq2}
 
-Figure~\ref{fig:4a} scores every trajectory at the prefix available $h$ minutes after its first action, which is what a live monitor sees.
-One minute after the first action (median $k=2$ for incidents), M1 reaches PR-AUC 0.421 against 0.215 for B3$'$, a paired gain of $+0.206$ [0.032, 0.330], $p=0.010$, and the same holds at the absolute checkpoint $k=2$ (0.418 vs.\ 0.209, $p=0.008$).
-From five minutes on the two representations are statistically indistinguishable, and from 30 minutes on B3$'$ is numerically ahead, once amounts, fan-out and hop depth have had time to develop; both curves rise from about 0.4 in the first minute to 0.63--0.71 after one day.
-Because we test eight horizons, the two significant early results would not survive a Bonferroni correction; we read them as consistent evidence, supported by both the online and the checkpoint view, that event types carry the signal when there is no structure yet.
-In the retrospective view, M1 reaches 0.483 with a quarter of each trajectory observed and 0.702 with the complete trajectory (B3$'$: 0.566 and 0.811), and Fig.~\ref{fig:4b} shows why early alerts are possible at all: the median calibrated score of incidents rises within the first 10\% of the trajectory while the median negative stays near 0.03.
+Figure~\ref{fig:4a} scores every trajectory at the online prefix $k(t_1+h)$.
+One minute after the first action (median $k=2$ for incidents), M1 reaches PR-AUC 0.421 against 0.215 for B3$'$, a paired gain of $+0.206$ [0.032, 0.330], $p=0.010$, and the absolute checkpoint $k=2$ agrees (0.418 vs.\ 0.209, $p=0.008$).
+From five minutes on the two representations are statistically indistinguishable, and from 30 minutes on B3$'$ is numerically ahead, once amounts, fan-out and hop depth have developed.
+The two early results would not survive a Bonferroni correction over eight horizons, but both views point the same way: event types carry the signal when there is no structure yet.
 
-We then replay every trajectory action by action, score each prefix $k\ge2$ with the calibrated M1 of its held-out fold, and record the first crossing of $\theta$ (Table~\ref{tab:lead}, Fig.~\ref{fig:4c}).
-At $\theta=0.5$, 12 of 15 incidents raise an alert, and 12 of the 206 negatives with at least two actions (5.8\%) raise a false alert; the other 187 negatives consist of a single action and are never scored.
-Of the 10 incidents with a confirmed endpoint, three are alerted before the exit: DeltaPrime 114 minutes and six steps early, Chibi Finance 7.5 minutes and 17 steps early, and Radiant Capital 5 minutes and five steps early.
-Four endpoints (FEG, New Free DAO, XKingdom, BSC Token Hub) are the \emph{first} action of the trace, so no prefix-based detector can warn before them; of the six incidents where an early alert is possible, three receive one.
-Raising $\theta$ trades detections for false alerts: at 0.7 the false-alert rate drops to 1.9\% but only one incident is alerted early.
-In the Chibi Finance rug pull on Arbitrum (40 actions in 12.6 hours, Fig.~\ref{fig:4d}), the endpoint is action 19, a Stargate bridge deposit 10 minutes after the first action.
-After the second action, 2.8 minutes in, the calibrated score is 0.62 and the alert fires 449\,s and 17 actions before the bridge deposit, with the mean log amount ($+1.50$), the fan-out of the seed ($+0.84$) and a short mean gap between actions ($+0.81$) as top TreeSHAP contributions, i.e.\ AADAPT layering (ADT3028.003); the score stays at or above 0.5 for 97\% of the remaining prefixes.
+The retrospective checkpoints confirm the trend (M1 0.483 at $r=25\%$ and 0.702 at $r=100\%$; B3$'$ 0.566 and 0.811).
+Figure~\ref{fig:4b} shows why early alerts are possible at all: the median calibrated score of incidents rises within the first 10\% of the trajectory, while the median negative stays near 0.03.
+
+We then replay every trajectory action by action with the calibrated M1 of its held-out fold (Alg.~\ref{alg:monitor}) and evaluate Eq.~\eqref{eq:rates} for several $\theta$ (Table~\ref{tab:lead}, Fig.~\ref{fig:4c}).
+At $\theta=0.5$, 12 of 15 incidents raise an alert and $\mathrm{FAR}=12/206=5.8\%$; the other 187 negatives consist of a single action and are never scored.
+Three incidents are alerted before the exit: DeltaPrime 114 minutes and six steps early, Chibi Finance 7.5 minutes and 17 steps early, and Radiant Capital 5 minutes and five steps early.
+Four endpoints are the \emph{first} action of the trace ($e^\star=1$), so no prefix-based detector can warn before them; of the six incidents where an early alert is possible, three receive one.
+Raising $\theta$ to 0.7 lowers FAR to 1.9\% but leaves one early alert.
+
+In the Chibi Finance rug pull on Arbitrum (Fig.~\ref{fig:4d}), $e^\star=19$ is a Stargate bridge deposit 10 minutes after the first action.
+After the second action the calibrated score is 0.62 and the alert fires 449\,s and 17 actions before the deposit, with the mean log amount ($+1.50$), the seed's fan-out ($+0.84$) and a short mean gap ($+0.81$) as top TreeSHAP terms, i.e.\ AADAPT layering (ADT3028.003).
 
 \begin{table}[t]
 \centering
-\caption{RQ2: first alerts of calibrated M1 when every prefix $k\ge2$ is scored online. ``Before $t_e$'' counts the 10 incidents with a confirmed endpoint; 4 of them have their endpoint at $k=1$ and cannot be alerted early. False alerts are per trajectory over the 206 negatives with $\ge2$ actions.}
+\caption{RQ2: first alerts of calibrated M1 when every prefix $k\ge2$ is scored online. ``Before $t_e$'' counts the 10 incidents in $\mathcal{P}_e$; 4 of them have $e^\star=1$ and cannot be alerted early. False alerts are per trajectory over the 206 negatives in $\mathcal{N}_{\ge2}$.}
 \label{tab:lead}
 \small
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{@{}cccccc@{}}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}llllll@{}}
 \toprule
-$\theta$ & Before $t_e$ & Median lead [IQR] & Late / never & Incidents alerted & False-alert rate \\
+$\theta$ & Before $t_e$ & Median lead [IQR] & Late / never & Alerted & FAR \\
 \midrule
 0.3 & 3/10 & 7.5 min [6.4, 60.5] & 6 / 1 & 14/15 & 12.6\% (26/206) \\
 0.5 & 3/10 & 7.5 min [6.4, 60.5] & 5 / 2 & 12/15 & 5.8\% (12/206) \\
 0.7 & 1/10 & 7.5 min & 2 / 7 & 5/15 & 1.9\% (4/206) \\
 0.9 & 0/10 & -- & 0 / 10 & 0/15 & 0.0\% (0/206) \\
 \bottomrule
-\end{tabular}}
+\end{tabular*}
 \end{table}
 
 \begin{figure}[t]
@@ -403,20 +499,27 @@ $\theta$ & Before $t_e$ & Median lead [IQR] & Late / never & Incidents alerted &
 \label{fig:rq2}
 \end{figure}
 
-\subsection{RQ3 and RQ4: Robustness, Calibration, Explanations and Cost}
+\subsection{RQ3: Are the Alerts Calibrated, Explainable, Robust to Mimicry and Cheap Enough to Run Online?}
 \label{sec:rq3}
 
-No single group removal changes pooled PR-AUC significantly (Fig.~\ref{fig:5a}): temporal $+0.035$ ($p=0.75$), motifs $-0.025$ ($p=0.23$), typed actions $+0.020$ ($p=0.97$), bridge-context features $+0.034$ ($p=0.49$).
-Choosing the bridge-context features inside each training split (nested LOIO) keeps them in 3 of 15 folds and yields 0.490, within $0.011$ of M1 ($p=0.92$), so M1 as reported uses no post-hoc feature selection.
-Raw XGBoost scores are overconfident (ECE 0.071, Brier 0.075, Fig.~\ref{fig:5b}); Platt scaling fitted on inner-fold scores reduces ECE to 0.015 and Brier to 0.062, and isotonic regression reaches 0.021.
-Inserting $j$ small decoy transfers to fresh addresses after every action (1\% of the value, one second apart) lowers the fraction of incidents alerted from 80\% to 60--67\% and the mean score at the 25\% checkpoint from 0.36 to 0.25 (Fig.~\ref{fig:5c}): the detector degrades but is not blinded by cheap padding.
-With one expansion round instead of two, M1 rises to 0.637--0.679 for $\eta\in\{5,10,20\}\%$ and is above B3$'$ in all three settings, so the ranking of the two representations depends on how far the trace is followed.
+We measure calibration by the expected calibration error over ten equal-width bins $\mathcal{B}_1,\dots,\mathcal{B}_{10}$ and by the Brier score,
+\begin{equation}
+\mathrm{ECE}=\sum_{b=1}^{10}\frac{|\mathcal{B}_b|}{N}\,\Bigl|\frac{1}{|\mathcal{B}_b|}\sum_{i\in\mathcal{B}_b}y_i-\frac{1}{|\mathcal{B}_b|}\sum_{i\in\mathcal{B}_b}\hat p_i\Bigr|,\qquad
+\mathrm{Brier}=\frac1N\sum_{i=1}^{N}(\hat p_i-y_i)^2 .
+\label{eq:ece}
+\end{equation}
+Raw XGBoost scores are overconfident (ECE 0.071, Brier 0.075, Fig.~\ref{fig:5b}); Platt scaling (Eq.~\eqref{eq:platt}) reduces them to 0.015 and 0.062, and isotonic regression reaches an ECE of 0.021.
 
-Averaged over all prefixes (Fig.~\ref{fig:5d}), the largest TreeSHAP contributions come from the mean log amount, the bridge-deposit share, value retention, the mean gap between actions and the fan-out of the seed; two typed features (bridge-deposit share, bigram diversity) and the rapid-token-pivot motif are among the top ten.
-Stolen funds are large, move fast and leave the seed in few hops, whereas hard negatives are dominated by single bridge deposits of ordinary size (Fig.~\ref{fig:2b}).
-On CAGI-Synth every learned detector reaches PR-AUC $\ge0.97$ at every difficulty while M1 trained on real incidents scores 0.014 on it, so typology-based generators are easier than real incidents and do not share their feature distribution.
-Finally, extracting the features of one prefix and scoring it takes a median of 11.7\,ms at $k=2$ and 23.6\,ms at $k=850$ with a peak memory increase below 0.2\,MB, far below the 12\,s Ethereum slot time; end-to-end latency is dominated by the explorer API.
-Next-action forecasting was not attempted because the data fail two of three sufficiency criteria fixed in advance (transfers make up 67\% of transitions and lending deposits occur four times).
+No single group removal changes pooled PR-AUC significantly (Fig.~\ref{fig:5a}): temporal $+0.035$ ($p=0.75$), motifs $-0.025$ ($p=0.23$), typed actions $+0.020$ ($p=0.97$), bridge context $+0.034$ ($p=0.49$).
+Choosing the bridge-context features inside each training split (nested LOIO) yields 0.490, within $0.011$ of M1 ($p=0.92$), so M1 uses no post-hoc feature selection.
+With one expansion round instead of two, M1 rises to 0.637--0.679 for $\eta\in\{5,10,20\}\%$ and overtakes B3$'$, so the ranking of the two representations depends on how far the trace is followed.
+
+For mimicry, the attacker follows every action $a_i$ with $j$ decoy transfers of $0.01\,\rho(a_i)$ to fresh addresses, one second apart, which dilutes $r_y$ and the motifs without changing the flow.
+The fraction of incidents alerted falls from 80\% ($j=0$) to 60--67\% ($j\in\{1,2,4\}$), and the mean score at $r=25\%$ from 0.36 to 0.25 (Fig.~\ref{fig:5c}): the detector degrades but is not blinded by cheap padding.
+
+Averaged over all prefixes (Fig.~\ref{fig:5d}), the largest $|\phi_j|$ belong to the mean log amount, the bridge-deposit share, value retention, the mean gap and the seed's fan-out, and two typed features and the rapid-token-pivot motif are among the top ten: stolen funds are large, move fast and leave the seed in few hops.
+Extracting and scoring one prefix takes a median of 11.7\,ms at $k=2$ and 23.6\,ms at $k=850$ with less than 0.2\,MB of extra memory, far below the 12\,s Ethereum slot time.
+On the synthetic CAGI-Synth benchmark every learned detector exceeds 0.97 while M1 trained on real incidents scores 0.014, so typology-based generators are easier than real incidents and are not used as evidence.
 
 \begin{figure}[t]
 \centering
@@ -449,61 +552,23 @@ Next-action forecasting was not attempted because the data fail two of three suf
 \label{sec:discussion}
 %=============================================================================
 
-Early warning on real cross-chain incidents is feasible but hard: a calibrated detector alerts on 12 of 15 incidents at a 5.8\% per-trajectory false-alert rate on hard negatives from the same protocols, and in three of the six incidents where an early alert is possible it fires 5 to 114 minutes before the exit.
-The typed representation earns its keep in the first minute of a flow and in the explanation an analyst receives (``large amount, swap then fan-out within three minutes, ADT3028.003 Layering'' rather than an opaque score), while amounts, tempo and hop structure carry the signal once a flow has a few dozen actions; rule-based typology scores are far weaker than any learned detector.
-Rebuilding the pipeline also exposed three errors in our own earlier version, a length-leaking feature $k/n$, deeper expansion for incidents than for negatives, and a feature group dropped after inspecting all incidents; correcting them lowered the typed model's pooled PR-AUC from 0.736 to 0.479, and a prefix-invariance unit test, uniform expansion and nested selection now guard against them.
-
-The main limitations are the sample size (15 incidents, wide intervals, early-horizon gains that do not survive a Bonferroni correction), incomplete BSC negatives caused by the free API quota, selection bias towards large, well-investigated thefts, traces that stop at the bridge deposit instead of continuing on the destination chain, and an evaluation by offline replay rather than on a live stream against adaptive adversaries.
-CAGI-ED uses public on-chain data and public reports only, performs no de-anonymization, and produces calibrated, explained signals for human review under AML obligations for virtual-asset service providers~\cite{fatf2022targeted}, not automatic enforcement.
-The registries, raw API responses with checksums, decoded trajectories and scripts are available at \TBD{anonymous artifact URL}.
+Typing pays off in the first minute of a flow and in the explanation an analyst receives, while amounts, tempo and hop structure dominate once a flow has a few dozen actions.
+The main threats to validity are the small sample (15 incidents, wide intervals), incomplete BSC negatives caused by the free API quota, a bias towards large and well-investigated thefts, traces that stop at the bridge deposit, and an offline replay instead of a live stream with adaptive adversaries.
+CAGI-ED uses public data only, performs no de-anonymization and produces signals for human review under AML obligations for virtual-asset service providers~\cite{fatf2022targeted}; the artifact is available at \TBD{anonymous artifact URL}.
 
 %=============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %=============================================================================
 
-We framed cross-chain laundering analysis as early detection on trajectory prefixes and built CAGI-ED, a CPU-only pipeline from explorer APIs to calibrated, explained alerts.
-On 15 real incidents with 393 hard negatives from the same protocols, it alerts on most incidents at a low false-alert rate and, where the flow leaves time, minutes to hours before the exit.
-Typing each action by its DeFi semantics helps most at the very first steps of a flow and in explaining alerts, while amount, tempo and hop structure dominate later; a rule-based typology score is not a substitute for either.
-A larger set of incidents with complete negatives is the most important next step, followed by stitching bridge continuations across chains, evaluating against adaptive adversaries on a live stream, and revisiting next-action forecasting once enough labeled exits exist.
+We framed cross-chain laundering analysis as early detection on trajectory prefixes and built CAGI-ED, a CPU-only pipeline that turns explorer data into calibrated, explained alerts through a bounded value-flow builder, 37 prefix-invariant typed features and a Platt-calibrated gradient-boosted scorer.
+On 15 real incidents and 393 hard negatives from the same protocols, it alerts on 12 of 15 incidents at a 5.8\% per-trajectory false-alert rate and warns before the exit in three of the six incidents where this is possible, 5 to 114 minutes ahead.
+Typed features double PR-AUC over the same learner on flat features one minute after the first action (0.42 vs.\ 0.22, $p=0.01$), are on par over all prefixes (0.48 vs.\ 0.52), and all learned detectors far exceed a rule-based typology score (0.21).
+Calibration lowers the ECE from 0.071 to 0.015, cheap decoy transfers reduce detection only from 80\% to 60--67\%, and a prefix is scored in 12 to 24\,ms.
+
+Future work will enlarge the incident set with complete negatives, stitch bridge continuations on the destination chain, and evaluate the monitor on a live stream against adaptive adversaries.
 
 \bibliographystyle{splncs04}
 \bibliography{refs}
-
-\appendix
-\section{Incident Registry}
-\label{app:incidents}
-Table~\ref{tab:incidents} lists the incidents in chronological order. Full addresses, block numbers, transaction hashes of the evidence and all source links are in the file \path{metadata/incident_registry.csv} of the artifact.
-% BEGIN auto:incident-table (regenerated by scripts/make_figures.py)
-\begin{table}[h]
-\centering
-\caption{The 15 incidents. $n$: actions in the trajectory; endpoint: type and index $e^\star$ of the first exit action in the trace (-- if the confirmed exit lies outside the traced chain or depth); Neg.: hard negatives with a complete cache. $^\dagger$ rebuilt from our earlier decoded trace (Sect.~\ref{sec:setup}).}
-\label{tab:incidents}
-\scriptsize
-\setlength{\tabcolsep}{2.5pt}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{@{}ccccccccC{3.0cm}@{}}
-\toprule
-Incident & Start & Chain & Seed & $n$ & Hours & Endpoint ($e^\star$) & Neg. & Public sources \\
-\midrule
-Wault Finance & 2021-08-04 & BSC & 0x886358\ldots & 37 & 68.6 & -- (--) & 6 & SlowMist \\
-Qubit QBridge & 2022-01-27 & BSC & 0xd01ae1\ldots & 643 & 71.6 & -- (--) & 13 & CertiK;  SlowMist \\
-Paraluni$^\dagger$ & 2022-03-12 & BSC & 0x94bc1d\ldots & 425 & 71.9 & -- (--) & 1 & CertiK;  SlowMist \\
-Ronin Bridge & 2022-03-23 & ETH & 0x098b71\ldots & 331 & 48.2 & -- (--) & 75 & Ronin Network official disclosure;  Chainalysis \\
-HackerDAO & 2022-04-29 & BSC & 0xcfc591\ldots & 35 & 60.8 & -- (--) & 0 & CertiK Hackerdao Incident Analysis \\
-New Free DAO & 2022-05-10 & BSC & 0x22c973\ldots & 12 & 0.3 & mixer or exit (1) & 0 & Halborn;  ImmuneBytes \\
-BSC Token Hub & 2022-10-06 & BSC & 0x489a87\ldots & 364 & 63.7 & lending deposit (1) & 23 & Halborn;  Merkle Science \\
-Chibi Finance & 2023-06-27 & ARB & 0x80c1ca\ldots & 40 & 12.6 & bridge deposit (19) & 34 & CertiK \\
-XKingdom & 2024-01-06 & ARB & 0xef7dd2\ldots & 68 & 4.8 & bridge deposit (1) & 32 & CertiK \\
-WOOFi WooPPV2 & 2024-03-05 & ARB & 0x996119\ldots & 16 & 0.7 & bridge deposit (5) & 35 & Beosin;  CUBE3.AI \\
-UtopiaSphere & 2024-07-21 & BSC & 0x6e12ce\ldots & 37 & 42.5 & bridge deposit (10) & 8 & CertiK \\
-Radiant Capital & 2024-10-16 & ARB & 0x0629b1\ldots & 243 & 22.2 & bridge deposit (7) & 25 & Halborn official post-mortem analysis;  CoinDesk \\
-DeltaPrime & 2024-11-11 & ARB & 0x56e7f6\ldots & 22 & 23.3 & bridge deposit (8) & 75 & CertiK official incident analysis;  Halborn \\
-FEG SmartBridge & 2024-12-29 & ETH & 0xcb96dd\ldots & 9 & 0.2 & mixer or exit (1) & 42 & CertiK;  Halborn \\
-Abracadabra (MIM) & 2025-03-25 & ARB & 0x51c9d0\ldots & 90 & 12.7 & bridge deposit (31) & 24 & CertiK;  threesigma.xyz Abracadabra GMX V2 exploit analysis \\
-\bottomrule
-\end{tabular}}
-\end{table}
-% END auto:incident-table
 
 \end{document}
