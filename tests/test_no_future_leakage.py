@@ -97,6 +97,21 @@ def test_features_at_prefix_identical_regardless_of_future_actions():
     assert feats_a == feats_b, "Feature tại prefix=5 không được phụ thuộc action 6-10"
 
 
+def test_features_at_prefix_independent_of_future_trajectory_length():
+    """Bat leak kieu prefix_ratio = k/n (Todo T4): hai trajectory co CUNG 5
+    action dau nhung DO DAI tail khac nhau (1 vs 5 action) phai cho feature
+    giong het nhau tai prefix=5 — do dai cuoi cung chi biet sau khi dong
+    tien ket thuc."""
+    traj_long = _make_trajectory(_tail_variant_a)
+    traj_short = _make_trajectory(lambda a5: _tail_variant_a(a5)[:1])
+    assert len(traj_long) != len(traj_short)
+
+    feats_long = extract_features(traj_long, prefix_len=5)
+    feats_short = extract_features(traj_short, prefix_len=5)
+
+    assert feats_long == feats_short, "Feature tai prefix=5 khong duoc phu thuoc do dai trajectory cuoi cung"
+
+
 def test_prefix_only_reads_events_up_to_k():
     traj = _make_trajectory(_tail_variant_a)
     for k in [2, 3, 5, 7, 10]:

@@ -586,7 +586,9 @@ def extract_features(
         feats.update(_context_features(actions))
 
     feats["prefix_len"] = float(prefix_len)
-    feats["prefix_ratio"] = float(prefix_len) / len(trajectory) if len(trajectory) else 0.0
+    # KHONG tinh prefix_ratio = prefix_len / len(trajectory): mau so la do dai
+    # CUOI CUNG cua trajectory (chi biet sau khi dong tien ket thuc) -> leak
+    # thong tin tuong lai vao prefix. Da xoa 2026-09-27 (Todo T4).
     return feats
 
 

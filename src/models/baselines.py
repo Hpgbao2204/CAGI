@@ -171,7 +171,6 @@ class B3FlatGraphRandomForest:
       outgoing_incoming_ratio, value_retention, token_category_diversity.
     - temporal TỔNG QUÁT (không tham chiếu bridge): active_duration_sec,
       burstiness, inter_action_gap_mean/std.
-    - prefix_ratio: kích thước tương đối của prefix (không phải thông tin loại).
     """
 
     name = "B3_flat_graph_rf"
@@ -183,7 +182,6 @@ class B3FlatGraphRandomForest:
         "log_amount_mean", "outgoing_incoming_ratio", "value_retention", "token_category_diversity",
         # temporal tổng quát (KHÔNG gồm time_to_first_bridge — đặc thù bridge)
         "active_duration_sec", "burstiness", "inter_action_gap_mean", "inter_action_gap_std",
-        "prefix_ratio",
     )
 
     def __init__(self, **rf_kwargs) -> None:
@@ -299,7 +297,7 @@ class M1TypedTemporalMotifModel:
     def _candidate_columns(self, X: pd.DataFrame) -> List[str]:
         cols = []
         for c in X.columns:
-            if c in ("prefix_len", "prefix_ratio_meta"):
+            if c in ("prefix_len", "prefix_ratio"):  # prefix_ratio = k/n leak (T4)
                 continue
             if c.startswith("action_count_") and not c.endswith("_ratio"):
                 continue  # loại bản thô, giữ bản "_ratio"
