@@ -296,6 +296,7 @@ def expand_and_build_trajectory(
     max_iterations: Optional[int] = None,
     client: Optional[object] = None,
     request_delay_sec: float = 0.4,
+    collect_workers: int = 1,
 ) -> Tuple[Trajectory, List[CanonicalEvent], List[str]]:
     """Lặp: fetch (nếu do_collect) -> decode -> build_trajectory -> lấy dst
     của action được chấp nhận làm frontier kế tiếp -> lặp tới khi hội tụ.
@@ -329,8 +330,15 @@ def expand_and_build_trajectory(
         to_fetch = [a for a in frontier if a not in processed_set]
         if not to_fetch:
             break
+        if do_collect and collect_workers > 1 and len(to_fetch) > 1:
+            # Chi song song hoa buoc GOI API (moi dia chi 1 thu muc cache
+            # rieng); thu tu `processed` van giu nguyen thu tu frontier.
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=collect_workers) as pool:
+                list(pool.map(lambda a: collect_address_raw_data(client, chain, a, incident_id, start_block, end_block),
+                              to_fetch))
         for addr in to_fetch:
-            if do_collect:
+            if do_collect and not (collect_workers > 1 and len(to_fetch) > 1):
                 collect_address_raw_data(client, chain, addr, incident_id, start_block, end_block)
                 time.sleep(request_delay_sec)
             processed.append(addr)
