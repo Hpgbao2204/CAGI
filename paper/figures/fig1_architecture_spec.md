@@ -1,155 +1,207 @@
-# Figure 1 — Kiến trúc CAGI-ED (đặc tả để vẽ bằng draw.io)
+# Figure 1 — Kiến trúc CAGI-ED: hướng dẫn vẽ bằng draw.io
 
-Xuất ra `paper/figures/fig1_architecture.pdf` (File → Export as → PDF, tick
-"Crop"), khổ ngang, rộng ~17 cm (full text width LNCS 12.2 cm sẽ được scale).
-Paper tự chèn file này ở Sect. 4 (`\includegraphics{figures/fig1_architecture.pdf}`).
+Phong cách: giống `pipeline.pdf` tham khảo — nền trắng, ít chữ, mỗi giai đoạn
+là **1 khung nhỏ có hình minh hoạ cụ thể** (cylinder, dải tx, đồ thị chữ cái,
+bảng xếp hạng), **1 hộp công thức trung tâm**, bố cục **2 hàng**, mũi tên xanh
+lá nối hàng trên xuống hàng dưới, chú thích thời gian ở chân mỗi giai đoạn.
+**Mọi hình đều có sẵn trong draw.io** (không dùng logo chain, không cần ảnh ngoài).
 
-## Bố cục tổng thể
+Xuất: File → Export as → PDF, tick *Crop* → `paper/figures/fig1_architecture.pdf`.
 
-Một dải ngang, đọc trái → phải, chia **4 layer** bằng 4 khung bo góc nền nhạt
-(mỗi layer 1 màu nền rất nhạt, viền xám 1 pt, nhãn layer ở góc trên-trái in
-đậm):
+---
+
+## 0. Thiết lập chung
+
+| Mục | Giá trị |
+|---|---|
+| Canvas | ~1040 × 820 px, Grid 10 px |
+| Font | Helvetica; tiêu đề khối 13 pt **đậm**, chữ thường 11 pt, chú thích 10 pt |
+| Công thức | *Extras → Mathematical Typesetting* bật, gõ `$...$` trong text |
+| Viền | 1 px, bo góc 8 (`rounded=1;arcSize=6`) |
+
+Bảng màu (dùng lại đúng các mã này):
+
+| Vai trò | Fill | Stroke |
+|---|---|---|
+| Khung giai đoạn (nền xanh nhạt) | `#EEF3FA` | `#C9D6E8` |
+| Node thường / cylinder | `#C6DBF0` | `#5B84B1` |
+| Node xanh lá (đường đi được chọn) | `#A9D18E` | `#4E8F2F` |
+| Node cam (bridge) | `#F4B183` | `#C55A11` |
+| Node tím (mixer) | `#D9C3E9` | `#7E57A6` |
+| Seed / endpoint (đỏ) | `#FFFFFF` | `#C00000` (viền 2 px) |
+| Mũi tên chính | — | `#000000` 1.5 px |
+| Mũi tên "được chọn" | — | `#4E8F2F` 2 px |
+| Ngưỡng θ | — | `#C00000` nét đứt |
+
+Lấy hình ở đâu: gõ **từ khoá** vào ô *Search Shapes* (góc trên thanh Shapes
+bên trái) — cách này luôn ra, không phụ thuộc thư viện nào đang bật:
+
+| Hình | Từ khoá tìm | Thư viện thường gặp |
+|---|---|---|
+| Hình chữ nhật / bo góc / ellipse | `rectangle`, `rounded`, `ellipse` | General |
+| Cylinder (cache, chain) | `cylinder` | General |
+| Hexagon (bridge, mixer) | `hexagon` | General |
+| Document (icon báo cáo) | `document` | General |
+| Note | `note` | General |
+| Ngoặc nhọn `{` | `curly bracket` (hoặc Edit Style: `shape=curlyBracket;rounded=1;labelPosition=left;`) | Advanced / General |
+| Công tắc | `switch` (chọn "Switch" 2 chân) | Electrical → Electro-Mechanical |
+| Bảng xếp hạng | *Arrange → Insert → Table* (2 cột × 8 hàng) | có sẵn |
+| Mũi tên hai đầu | vẽ 1 đường thẳng, Format → *Line start* và *Line end* = mũi tên | có sẵn |
+| Vạch phân cách dọc | đường thẳng `#BFBFBF`, *Pattern: dashed* | có sẵn |
+
+---
+
+## 1. Bố cục tổng
 
 ```
- ┌─(L1) Multi-chain collection─┐ ┌─(L2) Semantic decoding─┐ ┌─(L3) Value-flow trajectory─┐ ┌─(L4) Online early-warning scorer─┐
- │  3 chain + API + cache      │→│  protocol map + merge  │→│  đồ thị tainted, prefix τ1:k│→│  x(τ1:k) → f → Platt → alert      │
- └─────────────────────────────┘ └────────────────────────┘ └────────────────────────────┘ └───────────────────────────────────┘
-                     ▲                                                                                         │
-                     └──────────────── feedback: frontier {v_a} \ P (địa chỉ mới cần fetch) ───────────────────┘ (mũi tên nét đứt phía dưới, từ L3 quay về L1)
-                                                                   dưới cùng: dải timeline prefix + endpoint (xem mục L5)
+┌──────────────── HÀNG 1: ONLINE SCORING (mỗi action mới) ───────────────────────────────────────┐
+│  (A) Seed & collection  ┆  (B) 3 khung xếp dọc      ──►  (C) hộp công thức  ──►  (D) bảng cảnh báo │
+│  dải tx + 3 cylinder    ┆  Typed actions / Value-flow                             xếp theo p̂, vạch θ│
+│  + evidence cache       ┆  trajectory / Prefix features                                        │
+│ ◄── Collection: s/address ──►◄──────────── Scoring: 12–24 ms per action ─────────────────────────►│
+└─────────────────────────────────────────────────────────────────────────────────┬───────────────┘
+                                                        mũi tên xanh lá (hàng vượt ngưỡng)       │
+┌──────────────── HÀNG 2: EARLY WARNING ───────────────────────────────────────────▼──────────────┐
+│  (E) Timeline prefix + lead time   ┆   (F) TreeSHAP + AADAPT    ──►  (G) Alert report + policy   │
+│ ◄──────── Lead time: t_e − t_a ────────►◄──────────────── Human review ────────────────────────►│
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Màu gợi ý (nhẹ, in đen trắng vẫn đọc được): L1 xanh dương nhạt `#e8f0fb`,
-L2 xanh lá nhạt `#e6f5ee`, L3 cam nhạt `#fdeee6`, L4 tím nhạt `#eeebf8`. Chữ
-đen/xám đậm. Mũi tên chính 1.5 pt đen; mũi tên phản hồi nét đứt xám.
+Hai hàng cách nhau bởi khoảng trắng; giữa (A) và (B), giữa (E) và (F) có 1
+vạch phân cách dọc nét đứt xám (giống tham khảo).
 
 ---
 
-## L1 — Multi-chain collection (khung trái)
+## 2. Hàng 1 — Online scoring
 
-**Thực thể (node) vẽ bên trong:**
+### (A) Seed & collection (x ≈ 20–290)
 
-1. **3 biểu tượng chain** xếp dọc, mỗi cái là 1 hình trụ nhỏ (shape
-   "Cylinder") có nhãn: `Ethereum (1)`, `BSC (56)`, `Arbitrum (42161)`.
-   Bên cạnh mỗi trụ vẽ 3–4 **ô block nhỏ nối chuỗi** (hình chữ nhật nhỏ nối
-   bằng đoạn thẳng) để gợi ý blockchain.
-2. **2 node API** (shape "Process"/hình chữ nhật có 2 vạch dọc):
-   * `Etherscan V2` — nối từ trụ Ethereum và Arbitrum; ghi nhỏ:
-     `txlist · txlistinternal · tokentx`
-   * `NodeReal nr_getAssetTransfers` — nối từ trụ BSC; ghi nhỏ: `in / out, paged`
-3. **Evidence cache** (shape "Database"): nhãn `Evidence cache`, dòng phụ:
-   `key = (chain, address, incident)`, `SHA-256 + request time`.
-4. Ô công thức nhỏ dưới cùng khung L1:
-   `window = [b₀, b₀ + 72 h]`
+1. Tiêu đề (text đậm, 2 dòng, căn trái): **Incident report → seed $s$**
+2. **Dải giao dịch** (5 hình chữ nhật dính nhau, cao 30, fill `#C6DBF0`):
+   `tx₁` | `…` | `tx_{k}` | `|` | ô cuối **đậm** fill `#1F3B5C`, chữ trắng `new`
+   (giống dải `tx0 … T` của tham khảo; ô cuối = action mới vừa tới).
+3. Mũi tên xuống → **3 Cylinder nhỏ** đặt ngang hàng (40×40), nhãn dưới:
+   `ETH`, `BSC`, `ARB`. Một text nhỏ phía trên: `Etherscan V2 · NodeReal`.
+4. Mũi tên từ 3 cylinder gộp xuống 1 **Cylinder lớn** (120×70), chữ **đậm**
+   hai dòng: **evidence cache**; dưới cylinder chú thích 10 pt:
+   `(chain, address, incident) · SHA-256`.
+5. Vòng phản hồi: mũi tên **nét đứt** từ khung (B) quay về cylinder lớn, nhãn
+   nghiêng `new frontier → fetch`.
 
-**Cạnh:** chain → API (mũi tên mảnh), API → cache (mũi tên đậm), cache →
-sang L2 (mũi tên chính).
+### (B) Ba khung xếp dọc (x ≈ 310–560) — mỗi khung Rounded Rectangle fill `#EEF3FA`
 
----
+**B1. Typed actions** (cao ~110)
+- Tiêu đề đậm: **Typed actions**
+- Một hàng 4 "viên" Rounded Rectangle nhỏ (48×20), chữ 9 pt:
+  `transfer` (fill `#D9D9D9`) · `swap` (`#C6DBF0`) · `bridge` (`#F4B183`) · `mixer` (`#D9C3E9`)
+- Dòng chú thích 10 pt: `verified protocol map · merge legs of one tx`
 
-## L2 — Semantic decoding (khung thứ 2)
+**B2. Value-flow trajectory** (cao ~130) — *giống ô "Token-flow graph" tham khảo*
+- Tiêu đề đậm: **Value-flow trajectory**
+- Đồ thị 5 node (Ellipse 30×30, chữ 11 pt đậm):
+  - `s` : fill trắng, viền đỏ 2 px (seed)
+  - `A` : fill `#A9D18E` (xanh lá)
+  - `B` : fill `#C6DBF0`
+  - `C` : **Hexagon** fill `#F4B183`, nhãn `bridge`
+  - `D` : **Hexagon** fill `#D9C3E9`, nhãn `mixer`
+- Cạnh: `s → A` (xanh lá đậm), `A → B`, `A → C` (xanh lá đậm), `B → D`;
+  thêm 1 cạnh nét đứt xám từ `B` ra 1 chấm tròn rỗng nhỏ, nhãn `share < η`.
+- Chú thích 10 pt dưới: `$\rho(a)/O(u_a,\kappa_a)\ge\eta$, 2 hops, 72 h`
 
-**Thực thể:**
+**B3. Prefix features** (cao ~110)
+- Tiêu đề đậm: **Prefix features $\mathbf{x}(\tau_{1:k})$**
+- Một **Curly Bracket** nằm ngang ôm 4 ô vuông nhỏ (màu như B1) + 3 ô xám nhạt
+  (phần tương lai, *Opacity 40%*), nhãn dưới ngoặc: `$a_1..a_k$ only`
+- 3 dòng text 10 pt (font mono như tham khảo, *Courier New*):
+  ```
+  flat(14)   gaps · fan-out · amount
+  typed(16)  type shares · bigrams
+  motif(7)   split · peel · bridge→swap
+  ```
 
-1. **Protocol map P** (shape "Document" hoặc bảng nhỏ 4 hàng):
-   ```
-   bridges  (9 contracts, 8 families)
-   DEX      (6 routers/pools)
-   mixers   (2)
-   lending  (1)
-   ```
-   ghi nhỏ bên dưới: `verified on-chain (selector / event sig)`.
-2. **Decoder** (hình chữ nhật): `raw leg → canonical action a`.
-3. **Merge rule** (hình thoi "Decision" hoặc 3 ô nhỏ xếp dọc), mỗi ô là 1
-   luật gộp các leg cùng tx:
-   * `≥2 tokens in/out same addr → swap`
-   * `1 src → ≥2 dst → split`
-   * `≥2 src → 1 dst → merge`
-4. **Canonical action** — ghi công thức ở ô nổi bật:
-   `a = (t, c, u, v, y, κ, q, π)` với `q = log(1 + amount)`
-5. **Type vocabulary Y** — vẽ **10 viên thuốc màu (pill) nhỏ**, mỗi viên 1
-   kiểu, dùng lại màu này ở L3 để tô cạnh:
-   `transfer` (xám), `swap` (xanh dương), `bridge_dep` (cam), `bridge_wdr`
-   (cam nhạt), `lend_dep` (vàng), `lend_wdr` (vàng nhạt), `split` (xanh lá),
-   `merge` (xanh lá nhạt), `mixer/exit` (đỏ), `other` (trắng viền xám).
+### (C) Hộp công thức (x ≈ 590–740) — *giống hộp σ(...) tham khảo*
 
-**Cạnh:** cache → decoder; protocol map → decoder (mũi tên từ trên xuống);
-decoder → merge → "typed actions" → sang L3.
+- Rounded Rectangle trắng, viền đen 1.5 px, ~150×80.
+- Nội dung (LaTeX): `$\hat p_k=\sigma\!\big(\alpha\,\mathrm{logit}\,f(\mathbf{x}(\tau_{1:k}))+\beta\big)$`
+- Dưới hộp, text 10 pt: `XGBoost $f$ + Platt ($\alpha,\beta$ from training incidents)`
+- 3 mũi tên đen từ B1, B2, B3 hội tụ vào cạnh trái hộp (như tham khảo).
 
----
+### (D) Bảng cảnh báo (x ≈ 770–880) — *giống bảng "candidates" tham khảo*
 
-## L3 — Bounded value-flow trajectory (khung thứ 3, phần "mạng" chính)
+- Tiêu đề đậm phía trên: **monitored flows**
+- Table 2 cột (cột 1 rộng 70: tên flow; cột 2 rộng 45: điểm), 8 hàng:
+  ```
+  chibi·k=2    0.62
+  flow-17      0.58
+  flow-03      0.51
+  ----------- θ -------   ← đường nét đứt đỏ vắt ngang giữa hàng 3 và 4, nhãn đỏ bên phải: θ
+  flow-11      0.31
+  flow-08      0.12
+  flow-22      0.05
+  ⋮
+  ```
+  3 hàng trên fill `#D5E8D4` (xanh lá nhạt, vượt ngưỡng).
+- Mũi tên từ hộp (C) → bảng.
+- **Mũi tên xanh lá** (2 px, bo góc) đi từ hàng 1 của bảng, sang phải, vòng
+  xuống dưới, chạy ngang sang trái, rồi đi xuống vào khung (E) của hàng 2
+  (giống đường xanh lá của tham khảo).
 
-Đây là phần nên vẽ như **một đồ thị thật**:
-
-1. **Đồ thị có hướng ~10 node**:
-   * Node **seed s** (hình tròn đậm, viền đỏ, nhãn `s (seed, d=0)`).
-   * 2–3 node **ví trung gian** tầng 1 (tròn trắng, nhãn `d=1`).
-   * 3–4 node tầng 2 (`d=2`).
-   * Node **hạ tầng** (hình lục giác, nền xám): `DEX router`, `Bridge`,
-     `Mixer` — thuộc P, **không mở rộng qua** (vẽ viền kép hoặc icon ổ khoá).
-   * Cạnh tô màu theo kiểu hành động (dùng màu pill ở L2): s→v1 `transfer`,
-     v1→DEX `swap`, v1→v2a,v2b,v2c `split` (3 cạnh xanh lá tỏa ra), v2b→Bridge
-     `bridge_dep` (cam, **đậm**), v2c→Mixer `mixer/exit` (đỏ).
-   * 1–2 cạnh **nét đứt xám mảnh** đi ra khỏi đồ thị có nhãn `share < η`
-     (bị loại vì giá trị nhỏ).
-2. **Hộp luật chấp nhận** (ô công thức, đặt góc trên phải khung L3):
-   ```
-   accept a  ⇔  d(u_a) < D  ∧  t_a − t₁ ≤ H
-                ∧ [ ρ(a) / O(u_a, κ_a) ≥ η   ∨   {u_a, v_a} ∩ P ≠ ∅ ]
-   d(v_a) ← min(d(v_a), d(u_a) + 1)   (v_a ∉ P)
-   η = 5%,  H = 72 h,  2 expansion rounds
-   ```
-   (ρ(a) = e^q − 1 là giá trị thô; O(u, κ) là tổng outflow của u theo token κ)
-3. **Mũi tên phản hồi** (nét đứt, từ đồ thị L3 vòng xuống dưới quay về L1):
-   nhãn `new frontier {v_a} \ P → fetch`.
-
----
-
-## L4 — Online early-warning scorer (khung phải)
-
-Vẽ như 1 **pipeline dọc** các khối, mỗi khối có công thức:
-
-1. **Prefix τ₁:ₖ** — một hàng 6–8 ô vuông nhỏ (mỗi ô 1 action, tô màu theo
-   kiểu), 3–4 ô đầu tô đậm, phần còn lại mờ; ngoặc nhọn bên dưới ô đậm ghi
-   `observed prefix τ₁:ₖ (a₁..a_k only)`. Mũi tên nhỏ `k ← k+1 on each new action`.
-2. **Feature extractor** — 3 ô nhỏ song song (3 nhóm feature):
-   * `Flat (14)`: gaps, burstiness `B = (σ−μ)/(σ+μ)`, fan-in/out, depth, value retention
-   * `Typed actions (16)`: type shares, bigrams/trigrams, bridge families
-   * `Motifs (7)`: split, merge, peel chain, bridge→swap, nested bridge, token pivot
-   gộp lại thành vector `x(τ₁:ₖ) ∈ ℝ³⁷`.
-3. **Scorer f** — icon 3 cây nhỏ (gradient-boosted trees), nhãn
-   `XGBoost (200 × depth 4)`.
-4. **Calibration** — ô công thức:
-   `p̂ₖ = σ(α · logit f(x) + β)`   (Platt, fitted on training incidents only)
-5. **Decision** — hình thoi: `p̂ₖ ≥ θ ?` → nhánh **yes** tới
-   6. **Alert card** (hình chữ nhật viền đỏ, như 1 tấm thẻ):
-      ```
-      ALERT  incident seed s, step k, p̂ = 0.xx
-      top TreeSHAP:  φ₁ swap share +…, φ₂ path depth +…, φ₃ …
-      AADAPT: ADT3028.003 Layering, ADT3005 Hopping
-      ```
-      và nhánh **no** quay lại "wait for next action".
-   Ghi nhỏ cạnh TreeSHAP: `logit f(x) = φ₀ + Σⱼ φⱼ(x)`.
+### Chú thích thời gian hàng 1 (dưới cùng hàng 1)
+Hai mũi tên hai đầu xám mảnh, chữ 10 pt ở giữa:
+- dưới (A): `Collection: seconds per address`
+- dưới (B)–(D): `Scoring: 12–24 ms per action (CPU)`
 
 ---
 
-## L5 — Dải timeline (dưới cùng, trải hết chiều ngang, tuỳ chọn nhưng nên có)
+## 3. Hàng 2 — Early warning
 
-Trục thời gian `t` với các chấm action a₁…aₙ; đánh dấu:
-* vạch cam nét đứt `first alert t_a (k_a)`,
-* vạch đỏ gạch-chấm `endpoint t_e (first bridge/mixer/lending deposit)`,
-* mũi tên hai đầu giữa chúng: `lead time = t_e − t_a`, `lead steps = e* − k_a`.
+### (E) Timeline & lead time (x ≈ 20–420)
 
-Dải này thay cho hình "prefix" cũ và cho người đọc thấy ngay ý chính của
-paper: **cảnh báo trong lúc tiền còn đang chạy, trước điểm thoát**.
+- Tiêu đề đậm: **Prefix replay**
+- Dải action (giống dải tx hàng 1), 9 ô:
+  `a₁` `a₂` `…` `a_{k_a}` `…` `a_{e*}` `…` `a_n`
+  - ô `a_{k_a}` fill `#A9D18E` (xanh lá — điểm cảnh báo đầu tiên),
+  - ô `a_{e*}` viền đỏ 2 px, fill `#F8CBAD` (endpoint: bridge/mixer/lending deposit).
+- Phía trên dải: 1 **Switch (SPST)** nhỏ (Electrical) + text `$\hat p_k\ge\theta$`
+  đặt ngay trên ô `a_{k_a}` (giống "value switch" của tham khảo).
+- Dưới dải: 1 mũi tên hai đầu từ `a_{k_a}` tới `a_{e*}`, nhãn
+  `lead time $t_e-t_a$  ·  lead steps $e^\star-k_a$`.
+- Chú thích đỏ 10 pt dưới ô endpoint: `exit: bridge / mixer / lending`.
+
+### (F) Explanation (x ≈ 440–690)
+
+- Tiêu đề đậm: **TreeSHAP evidence**
+- 3 thanh ngang (Rectangle cao 12, fill `#5B84B1`) độ dài giảm dần, nhãn bên
+  trái 10 pt: `amount`, `fan-out`, `swap share`; trục mảnh phía dưới.
+- Text 10 pt dưới: `$\mathrm{logit} f(\mathbf{x})=\phi_0+\sum_j\phi_j$`
+- 1 ô Note nhỏ: `AADAPT: ADT3028.003 Layering`
+
+### (G) Alert report + policy (x ≈ 710–1020) — *giống "Triage report" + "Builder policy"*
+
+- Tiêu đề đậm: **Alert report** + icon **Document** nhỏ bên trái.
+- Rectangle trắng, font mono 10 pt:
+  ```
+  {"seed": "0x80c1…",
+   "step": 2, "p": 0.62,
+   "top": ["amount", "fan-out", "swap"],
+   "aadapt": ["ADT3028.003"]}
+  ```
+- Mũi tên từ (F) → (G) (qua 1 **Ellipse** nhỏ chữ `Ω`/hoặc `⊕` nếu muốn giống
+  tham khảo, không bắt buộc).
+- Dưới: tiêu đề đậm **Analyst policy** + icon Document; khung 3 dòng màu:
+  - **`p̂ ≥ θ`** (xanh lá `#2E7D32`) `→ notify analyst`
+  - **`θ' ≤ p̂ < θ`** (xanh dương `#1F5FAD`) `→ keep monitoring`
+  - **`p̂ < θ'`** (đỏ sẫm `#A50021`) `→ no action`
+
+### Chú thích thời gian hàng 2
+- dưới (E): `Lead time: minutes before exit`
+- dưới (F)–(G): `Human review`
 
 ---
 
-## Lưu ý trình bày
+## 4. Checklist trước khi xuất
 
-* Font sans (Helvetica/Arial) 8–9 pt khi scale về 12 cm; công thức dùng
-  Math typesetting của draw.io (Extras → Mathematical Typesetting) để ra
-  LaTeX thật: ví dụ `$\hat p_k=\sigma(\alpha\,\mathrm{logit} f(\mathbf x)+\beta)$`.
-* Nhất quán ký hiệu với paper: s, a, τ₁:ₖ, x(τ₁:ₖ), f, p̂ₖ, θ, η, H, P, e*, t_a, t_e.
-* Không đặt con số kết quả (PR-AUC…) trong hình kiến trúc.
+- [ ] Ký hiệu khớp paper: $s$, $a_k$, $\tau_{1:k}$, $\mathbf{x}(\tau_{1:k})$, $f$, $\hat p_k$, $\theta$, $\eta$, $e^\star$, $t_a$, $t_e$.
+- [ ] Không có số kết quả nào ngoài ví dụ minh hoạ (0.62 của Chibi là số thật trong paper; các flow khác ghi rõ là ví dụ).
+- [ ] Chữ nhỏ nhất ≥ 9 pt ở kích thước canvas (hình sẽ scale về ~12 cm).
+- [ ] Chỉ dùng hình tìm được bằng ô Search của draw.io (không chèn ảnh/logo ngoài).
