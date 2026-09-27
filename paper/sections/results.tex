@@ -73,7 +73,7 @@ S1 & GRU over typed action tokens & 0.368 [0.221, 0.583] & 0.516 & $+0.111$ (0.2
 Figure~\ref{fig:4b} scores every trajectory at the prefix available $h$ minutes after its first action, which is what a live monitor sees.
 One minute after the first action (median $k=2$ for incidents), M1 reaches PR-AUC 0.421 against 0.215 for B3$'$, a paired gain of $+0.206$ [0.032, 0.330], $p=0.010$.
 The same holds at the absolute checkpoint $k=2$ (0.418 vs.\ 0.209, $+0.210$ [0.037, 0.333], $p=0.008$).
-From five minutes on, the two representations are statistically indistinguishable, and B3$'$ is numerically ahead once flows are longer than about 15 actions, when amounts, fan-out and hop depth have had time to develop.
+From five minutes on, the two representations are statistically indistinguishable, and from 30 minutes on (a median of nine incident actions) B3$'$ is numerically ahead, once amounts, fan-out and hop depth have had time to develop.
 Both curves rise with the horizon, from about 0.4 in the first minute to 0.63--0.71 after one day.
 Because we test eight horizons, the two significant early results would not survive a Bonferroni correction ($0.05/8=0.006$); we read them as consistent evidence, supported by both the online and the checkpoint view, that event types carry the signal when there is no structure yet.
 
