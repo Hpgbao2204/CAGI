@@ -1,0 +1,35 @@
+{
+  "summary": [
+    {
+      "incident_id": "ronin_bridge_2022",
+      "accepted": 70,
+      "checked": 88,
+      "elapsed_sec": 0.2
+    },
+    {
+      "incident_id": "deltaprime_arbitrum_2024",
+      "accepted": 70,
+      "checked": 129,
+      "elapsed_sec": 1.2
+    },
+    {
+      "incident_id": "bsc_token_hub_2022",
+      "accepted": 70,
+      "checked": 104,
+      "elapsed_sec": 0.8
+    },
+    {
+      "incident_id": "qbridge_qubit_2022",
+      "accepted": 35,
+      "checked": 100,
+      "elapsed_sec": 1.9
+    },
+    {
+      "incident_id": "feg_bridge_2024",
+      "accepted": 32,
+      "checked": 100,
+      "elapsed_sec": 0.3
+    }
+  ],
+  "total_accepted": 277
+}

@@ -1,0 +1,88 @@
+# Feature ỨNG VIÊN MỚI — Giai đoạn A (Tuần 11, kế hoạch dài hơi A→B→C).
+# KHÔNG phải feature chính thức — chỉ dùng cho thử nghiệm đánh giá trước
+# khi quyết định nhóm nào mang sang Giai đoạn B (mở rộng dataset).
+#
+# KHÁC configs/features.yaml/features_v2_computed.json: 6 nhóm hiện có
+# (temporal/structural/economic/semantic_action/motif/context) KHÔNG đổi,
+# vẫn dùng nguyên cho RQ1/RQ2 chính thức đã freeze v1.0. 4 nhóm dưới đây
+# CHỈ implement trong src/features/extractor.py::extract_v3_candidate_features()
+# (tách biệt hoàn toàn, không gọi từ extract_features()/extract_all_prefixes()).
+
+version: "v3_candidate"
+status: "experimental — Giai đoạn A, CHƯA quyết định mang nhóm nào sang chính thức"
+base_dataset: "features_v2.parquet (không mining thêm — dùng 11 incident + hard-negative đã có)"
+
+feature_groups_candidate:
+  cross_chain:
+    features: [cross_chain_distinct_count, cross_chain_expansion_rate]
+    implementation: "src/features/extractor.py::_cross_chain_features"
+    rationale: >
+      Số chain phân biệt đã chạm tới tại mỗi prefix (dựa trên chain_id thật
+      của event, không suy ra từ đếm bridge action như num_bridge_families
+      đã có) + tốc độ mở rộng sang chain mới theo thời gian.
+    known_limitation: >
+      ĐÃ XÁC NHẬN bằng dữ liệu thật (không suy đoán): kiến trúc pipeline
+      hiện tại build MỖI trajectory hoàn toàn trong 1 chain duy nhất
+      (bridge_deposit/withdraw không kèm fetch dữ liệu chain đích) — mọi
+      trajectory hiện có chỉ có đúng 1 chain_id distinct. Feature này DỰ
+      KIẾN có variance=0 trên dữ liệu hiện tại (xem Bước 2 để xác nhận
+      thực nghiệm). Nếu muốn feature này có tín hiệu thật, cần thay đổi
+      kiến trúc thu thập dữ liệu (fetch cả 2 phía của 1 bridge event) —
+      NGOÀI PHẠM VI Giai đoạn A/B hiện tại.
+
+  token_diversity_filtered:
+    features: [token_category_diversity_filtered, token_value_entropy_filtered]
+    implementation: "src/features/extractor.py::_token_diversity_filtered_features"
+    min_value_share: 0.01  # ngưỡng lọc dust: token phải chiếm >=1% tổng inflow (raw value, không phải log-scale)
+    rationale: >
+      Token entropy/diversity CHỈ tính trên token có value share đủ lớn —
+      tránh dust/spam token thổi phồng diversity giả tạo (tài liệu gốc mục
+      3.9).
+    found_issue_in_existing_feature: >
+      `token_category_diversity` HIỆN CÓ (economic group,
+      src/features/extractor.py::_economic_features) = đếm MỌI token phân
+      biệt, KHÔNG lọc theo value share — XÁC NHẬN đúng nghi ngờ ban đầu:
+      đây là hạn chế/bug tiềm ẩn của feature cũ. KHÔNG sửa trực tiếp (tránh
+      đổi RQ1/RQ2 đã freeze v1.0 ngoài ý muốn) — chỉ ghi nhận, đề xuất thay
+      thế bằng bản filtered nếu Giai đoạn B chọn mang nhóm này đi tiếp.
+
+  local_centrality:
+    features: [seed_betweenness_centrality, seed_closeness_centrality, mean_betweenness_centrality, local_centrality_capped]
+    implementation: "src/features/extractor.py::_local_centrality_features"
+    algorithm: "Brandes' betweenness centrality (chính xác, không xấp xỉ thuật toán) + BFS closeness — coi cạnh vô hướng"
+    max_nodes_for_exact: 500  # guard an toan, tra NaN + local_centrality_capped=1 neu vuot (chua gap trong du lieu hien co)
+    rationale: >
+      "Approximate" ở đây có nghĩa là xấp xỉ SO VỚI mạng blockchain đầy đủ
+      (betweenness toàn mạng — tài liệu gốc đã loại vì quá đắt), KHÔNG phải
+      xấp xỉ thuật toán trong phạm vi subgraph nhỏ đã bounded sẵn của chính
+      trajectory (Brandes' algorithm chạy CHÍNH XÁC, rẻ vì graph nhỏ).
+
+  percentile_normalized:
+    features: ["{feature}_percentile_vs_hard_negative"]
+    base_features_chosen: [log_amount_mean, fan_out]
+    implementation: "src/features/extractor.py::percentile_rank_against_reference (hàm thuần túy) + scripts/run_feature_candidates_v3_evaluation.py (áp dụng fold-aware)"
+    rationale: >
+      Percentile rank của log_amount_mean/fan_out so với quần thể
+      hard-negative — có thể giúp phân biệt giá trị BẤT THƯỜNG so với phân
+      phối chung thay vì chỉ dùng giá trị tuyệt đối.
+    leakage_note: >
+      KHÁC 3 nhóm trên — feature này phụ thuộc QUẦN THỂ THAM CHIẾU (không
+      tính thuần túy từ 1 trajectory), nên KHÔNG thể nằm trong
+      extract_v3_candidate_features() (hàm chỉ nhận 1 trajectory). Quần thể
+      tham chiếu PHẢI được tính CHỈ từ train fold (không bao giờ gồm outer
+      test fold của leave-one-incident-out) để tránh rò rỉ thống kê
+      validation vào feature — xử lý ở tầng script, per-fold, giống hệt
+      nguyên tắc `_filter_low_coverage_columns` đã áp dụng cho B2/M1.
+
+evaluation_plan: >
+  Bước 2 (scripts/run_feature_candidates_v3_evaluation.py): tính 4 nhóm
+  trên toàn bộ 11 incident + hard-negative hiện có (features_v2.parquet's
+  trajectory set, KHÔNG mining thêm) → M1_v3_full (6 nhóm cũ + 4 nhóm mới)
+  vs M1_v2_official (6 nhóm cũ, = kết quả freeze v1.0) → leakage/coverage
+  check → ablation M1_v3_full vs M1_v3_no_{group} cho từng nhóm riêng lẻ.
+
+decision_rule: >
+  Bước 3: CHỈ đề xuất mang nhóm có bằng chứng đóng góp thật (ablation cho
+  thấy khác biệt có ý nghĩa, không chỉ do nhiễu bootstrap) sang Giai đoạn
+  B. KHÔNG tự ý mang cả 4 nhóm nếu có nhóm không đóng góp. KHÔNG tự ý
+  chuyển sang Giai đoạn B — chỉ báo cáo, chờ quyết định người dùng.

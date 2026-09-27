@@ -1,0 +1,54 @@
+{
+  "raw_mining": 348,
+  "usable_mining": 338,
+  "n_empty_mining": 10,
+  "n_original_controls": 5,
+  "usable_total": 343,
+  "total_prefix_rows": 724,
+  "positive_prefix_rows": 46,
+  "negative_prefix_rows": 678,
+  "empty_rate_by_incident": {
+    "ronin_bridge_2022": {
+      "checked": 69,
+      "empty": 4
+    },
+    "deltaprime_arbitrum_2024": {
+      "checked": 70,
+      "empty": 3
+    },
+    "bsc_token_hub_2022": {
+      "checked": 69,
+      "empty": 2
+    },
+    "qbridge_qubit_2022": {
+      "checked": 35,
+      "empty": 0
+    },
+    "feg_bridge_2024": {
+      "checked": 31,
+      "empty": 0
+    },
+    "chibi_finance_2023": {
+      "checked": 25,
+      "empty": 0
+    },
+    "wooppv2_2024": {
+      "checked": 25,
+      "empty": 0
+    },
+    "utopiasphere_2024": {
+      "checked": 24,
+      "empty": 1
+    }
+  },
+  "per_incident_hn_count": {
+    "deltaprime_arbitrum_2024": 70,
+    "ronin_bridge_2022": 69,
+    "bsc_token_hub_2022": 69,
+    "qbridge_qubit_2022": 35,
+    "feg_bridge_2024": 31,
+    "chibi_finance_2023": 25,
+    "wooppv2_2024": 25,
+    "utopiasphere_2024": 24
+  }
+}

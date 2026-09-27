@@ -1,0 +1,66 @@
+{
+  "ronin_bridge_2022": {
+    "n_actions": 113,
+    "n_processed": 5
+  },
+  "ronin_benign_control_2022": {
+    "n_actions": 17,
+    "n_processed": 3
+  },
+  "qbridge_qubit_2022": {
+    "n_actions": 46,
+    "n_processed": 25
+  },
+  "feg_bridge_2024": {
+    "n_actions": 9,
+    "n_processed": 1
+  },
+  "deltaprime_arbitrum_2024": {
+    "n_actions": 5,
+    "n_processed": 3
+  },
+  "bsc_token_hub_2022": {
+    "n_actions": 73,
+    "n_processed": 4
+  },
+  "qbridge_benign_control_2022": {
+    "n_actions": 1,
+    "n_processed": 1
+  },
+  "feg_benign_control_2024": {
+    "n_actions": 1,
+    "n_processed": 1
+  },
+  "deltaprime_benign_control_2024": {
+    "n_actions": 1,
+    "n_processed": 1
+  },
+  "bsc_token_hub_benign_control_2022": {
+    "n_actions": 1,
+    "n_processed": 2
+  },
+  "chibi_finance_2023": {
+    "n_actions": 16,
+    "n_processed": 7
+  },
+  "wooppv2_2024": {
+    "n_actions": 6,
+    "n_processed": 2
+  },
+  "utopiasphere_2024": {
+    "n_actions": 16,
+    "n_processed": 5
+  },
+  "xkingdom_2024": {
+    "n_actions": 13,
+    "n_processed": 7
+  },
+  "wault_finance_2021": {
+    "n_actions": 15,
+    "n_processed": 9
+  },
+  "paraluni_2022": {
+    "n_actions": 23,
+    "n_processed": 6
+  }
+}

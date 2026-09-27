@@ -1,0 +1,172 @@
+bridges:
+  - name: "Ronin Bridge"
+    chains: ["eth", "ronin"]
+    contract_addresses:
+      eth: "0x1a2a1c938ce3ec39b6d47113c7955baa9dd454f2"  # SỬA từ địa chỉ sai (ví hacker 0x098b716b...) sang contract thật, xác nhận qua dữ liệu on-chain (txlist thật: bị gọi withdrawERC20For() bởi ví hacker ở block 14442835/14442840), không phải từ memory
+    linking_evidence: "dataset_published_pair + tx_confirmed_2026-08-13"
+    verify_status: "verified_onchain_2026-08-13"
+
+  - name: "Wormhole Token Bridge (Portal)"
+    chains: ["eth"]
+    contract_addresses:
+      eth: "0x3ee18b2214aff97000d974cf647e7c347e8fa585"
+    linking_evidence: "event_message_id"
+    verify_status: "verified_2026-08-13"
+
+  - name: "Stargate (LayerZero)"
+    chains: ["eth", "bsc", "arbitrum"]
+    contract_addresses:
+      eth: "0x8731d54e9d02c286767d56ac03e8037c07e01e98"
+      arbitrum: "0xbf22f0f184bccbea268df387a49ff5238dd23e40"  # Stargate Finance: ETH Router - xac nhan qua tx that goi swapETH(uint16 _dstChainId, address _refundAddress, bytes _toAddress, uint256 _amountLD, uint256 _minAmountLD) tu vi Chibi Finance exploiter (0x80c1ca8f..., block 105371084, 156.418 ETH) - chu ky ham dac trung Stargate, khop voi bao cao CertiK "156 ETH via Stargate Bridge", khong phai tu memory
+    linking_evidence: "event_message_id; onchain_function_signature_confirmed (Chibi Finance, arbitrum leg)"
+    verify_status: "verified_onchain_2026-08-14"
+
+  - name: "Multichain (AnySwap) Router V6"
+    chains: ["arbitrum"]
+    contract_addresses:
+      arbitrum: "0x650af55d5877f289837c30b94af91538a7504b76"  # xac nhan qua tx that goi anySwapOutNative(address token, address to, uint256 toChainID) tu vi Chibi Finance exploiter (0x80c1ca8f..., block 105369813, 400 ETH) - chu ky ham dac trung Multichain/AnySwap, khop voi bao cao CertiK "400 ETH via Multichain", khong phai tu memory. LUU Y: Multichain protocol ngung hoat dong tu giua 2023 (sau vu bat giu CEO) - contract van ton tai tren-chain nhung khong con dang tin cay/hoat dong, chi dung de doi chieu lich su, KHONG dung lam bridge route cho du lieu moi.
+    linking_evidence: "onchain_function_signature_confirmed (anySwapOutNative)"
+    verify_status: "verified_onchain_2026-08-14"
+
+  - name: "BSC Token Hub"
+    chains: ["bsc"]
+    contract_addresses:
+      bsc: "0x0000000000000000000000000000000000001004"  # system contract công khai trên BscScan (label "BSC: Token Hub"), xác nhận qua 2 internal tx thật gửi ĐÚNG 1,000,000 BNB mỗi lần (tổng 2,000,000 BNB, khớp CHÍNH XÁC báo cáo công khai Halborn/Elliptic) tới ví attacker, block 0x14f0ca1/0x14f1716 (2022-10-06), không phải từ memory
+    linking_evidence: "onchain_exact_amount_match_public_report"
+    verify_status: "verified_onchain_2026-08-13"
+
+  - name: "Multichain (AnySwap) Router V4 (legacy, 2023)"
+    chains: ["bsc"]
+    contract_addresses:
+      bsc: "0xd1c5966f9f5ee6881ff6b261bbeda45972b1b5f3"  # "Multichain: Router V4" - xac nhan qua BscScan label doc lap 2026-08-14. Xac nhan qua on-chain that: seed circulate_2023 exploiter (0x5695ef5f...) goi external call (value=0) toi day ngay truoc khi gui ETH/anyETH (block 24716329/24716393, 2023-01-12), khop mo ta CertiK "Bridge mechanism: Multichain Router". LUU Y: cung gioi han voi anyETH Token ben duoi - external call gia tri=0 bi decode_bsctrace_transfer_row bo qua, chua kich hoat duoc bridge_deposit tu dong.
+    linking_evidence: "onchain_call_pattern_confirmed (CirculateBUSD-CirculateWBNB)"
+    verify_status: "verified_onchain_2026-08-14"
+
+  - name: "Multichain (AnySwap) anyETH Token (legacy, 2021)"
+    chains: ["bsc"]
+    contract_addresses:
+      bsc: "0x6f817a0ce8f7640add3bc0c1c2298635043c2423"  # "Anyswap: anyETH Token" - xac nhan qua BscScan token label doc lap 2026-08-14. Gui anyETH VE CHINH contract nay la co che "burn to bridge" cua kien truc AnySwap doi dau (2021), KHAC dia chi Multichain Router V6 (2023) da them o Chibi Finance. Xac nhan qua on-chain that: seed Wault.Finance exploiter (0x886358f9...) gui anyETH ve day 3 lan ngay sau khi swap ETH->anyETH qua 0x146cd24d..., khop mo ta SlowMist "exchanged ETH for anyETH and then cross-chained".
+    linking_evidence: "onchain_self_transfer_burn_pattern_confirmed (Wault.Finance)"
+    verify_status: "verified_onchain_2026-08-14"
+
+  - name: "LI.FI Diamond"
+    chains: ["bsc", "arbitrum"]
+    contract_addresses:
+      bsc: "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae"  # LI.FI: LiFi Diamond (EIP-2535 diamond proxy, cross-chain swap+bridge aggregator, cung dia chi tren nhieu chain qua CREATE2) - xac nhan qua BscScan/Etherscan/Cronos Explorer label doc lap 2026-08-14 (KHONG phai tu memory). Xac nhan qua on-chain that: seed UtopiaSphere exploiter (0x6e12ce08...) gui 11 lan native BNB (tong ~1071.5 BNB) toi dia chi nay ngay sau khi rut can pool - khop pattern "swapped for 147.6 ETH and bridged to Ethereum" theo bao cao CertiK.
+      arbitrum: "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae"  # CUNG dia chi qua CREATE2 - xac nhan rieng qua Arbiscan getsourcecode 2026-08-27 (ContractName=LiFiDiamond). Xac nhan qua on-chain that: seed Radiant Capital exploiter (0x0629b1048298...) gui 56 lan ETH toi dia chi nay (bridge_deposit that, xem golden fixture radiant_capital_arbitrum_2024_events.golden.json).
+    linking_evidence: "onchain_repeated_transfer_pattern_confirmed (UtopiaSphere)"
+    verify_status: "verified_onchain_2026-08-14"
+
+  - name: "Across Protocol SpokePool (Arbitrum)"
+    chains: ["arbitrum"]
+    contract_addresses:
+      arbitrum: "0xe35e9842fceaca96570b734083f4a58e8f7c5f2a"  # xác nhận qua tx thật gọi depositV3(address depositor, address recipient, address inputToken,...) - chữ ký hàm đặc trưng của Across Protocol SpokePool, thấy trực tiếp trong txlist thật của ví DeltaPrime exploiter (block 273316631, 2.967 WBTC), không phải từ memory
+    linking_evidence: "onchain_function_signature_confirmed (depositV3)"
+    verify_status: "verified_onchain_2026-08-13"
+
+dexes:
+  - name: "Uniswap V2"
+    chains: ["eth"]
+    router_addresses:
+      eth: "0x7a250d5630b4cf539739df2c5dacb4c659f2488d"
+    verify_status: "verified_2026-08-13"
+
+  - name: "PancakeSwap V2"
+    chains: ["bsc"]
+    router_addresses:
+      bsc: "0x10ed43c718714eb63d5aa57b78b54704e256024e"
+    verify_status: "verified_2026-08-13"
+
+  - name: "Uniswap V3 SwapRouter"
+    chains: ["eth"]
+    router_addresses:
+      eth: "0xe592427a0aece92de3edee1f18e0157c05861564"  
+    verify_status: "verified_onchain_2026-08-13"
+
+  - name: "1inch v4 AggregationRouter"
+    chains: ["eth"]
+    router_addresses:
+      # BUG THẬT phát hiện 2026-08-14 (rà soát cache/pagination hệ thống, xem
+      # annotation_guide.md mục 14): địa chỉ trước đây bị THIẾU ký tự cuối
+      # ("...097" thay vì "...097d", 39 hex thay vì 40) — so sánh chuỗi trong
+      # known_protocol_allowlist không bao giờ khớp, khiến builder coi 1inch
+      # là ví thường và mở rộng frontier VÀO router (hàng triệu giao dịch
+      # không liên quan) -> nổ trajectory (vd ronin_bridge_2022 7->25 action
+      # khi rebuild sạch). Đã xác nhận lại qua Etherscan (nhãn "Aggregation
+      # Router V4" / 1inch v4).
+      eth: "0x1111111254fb6c44bac0bed2854e76f90643097d"
+    verify_status: "verified_onchain_2026-08-14_fixed_truncation"
+
+  - name: "Velora v5: Augustus Swapper (ParaSwap)"
+    chains: ["bsc"]
+    router_addresses:
+      # Phát hiện 2026-08-14 khi rebuild sạch qbridge_qubit_2022/
+      # utopiasphere_2024 - dia chi dung chung giua 2 incident bi test QA
+      # leakage bao gia (khong phai leak that). Xac nhan qua WebSearch:
+      # nhan cong khai "Velora v5: Augustus Swapper" (BscScan), ~1.7 trieu
+      # giao dich - DEX aggregator pho bien (tien than ParaSwap), khong phai
+      # 1 thuc the/counterparty phan biet duoc cho muc dich leave-one-group-out.
+      bsc: "0xdef171fe48cf0115b1d80b88dc8eab59176fee57"
+    verify_status: "verified_websearch_2026-08-14"
+
+  - name: "Uniswap V3: USDC 3 (pool)"
+    chains: ["eth"]
+    router_addresses:
+      # Phát hiện 2026-08-14 khi rebuild sạch ronin_bridge_2022: đây là 1
+      # pool Uniswap V3 THẬT (không phải ví/hacker) — xác nhận qua nhãn công
+      # khai "Uniswap V3: USDC 3" (Etherscan), KHÔNG có trong allowlist nên
+      # trajectory builder coi là "counterparty thường" và mở rộng frontier
+      # vào toàn bộ lịch sử giao dịch của pool (hàng trăm địa chỉ không liên
+      # quan) -> góp phần vào nổ trajectory. Pool contract, không phải
+      # router — vẫn đưa vào dex_allowlist với lý do tương tự router (hạ
+      # tầng dùng chung, giao dịch swap qua pool trực tiếp là bình thường
+      # với Uniswap V3, không phải luôn qua SwapRouter).
+      eth: "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640"
+    verify_status: "verified_websearch_2026-08-14"
+
+# Địa chỉ liên quan tới incident nhưng KHÔNG phải bridge/DEX contract (vd ví
+# nhận tiền của kẻ tấn công) — dùng làm seed để trace, KHÔNG được đưa vào
+# "bridges"/"dexes" vì sẽ làm sai lệch build_verified_bridge_address_index()
+# (mọi address trong "bridges" bị coi là bridge contract thật khi decode).
+known_seed_wallets:
+  - name: "Ronin Bridge Exploiter Wallet (Lazarus, OFAC-sanctioned)"
+    chains: ["eth"]
+    addresses:
+      eth: "0x098b716b8aaf21512996dc57eb0615e2383e2f96"  # ví nhận 173,600 ETH + 25.5M USDC từ vụ hack Ronin Bridge (2022-03-23), bị OFAC chế tài 2022-04-14
+    linking_evidence: "chainalysis_ofac_public_report"
+    verify_status: "verified_2026-08-13"
+
+mixers_exit_services:
+  - name: "Tornado Cash Router"
+    chains: ["eth"]
+    contract_addresses:
+      eth: "0xd90e2f925da726b50c4ed8d0fb90ad053324f31b"  # xác nhận qua function signature THẬT trên tx (không phải memory): deposit(address _tornado, bytes32 _commitment, bytes _encryptedNote) - chữ ký duy nhất của Tornado Cash Router, thấy trực tiếp trong txlist thật của ví FEG exploiter (7 lần gọi, block 21506183-21506237)
+    linking_evidence: "onchain_function_signature_confirmed"
+    verify_status: "verified_onchain_2026-08-13"
+
+  - name: "TornadoProxyLight"
+    chains: ["bsc"]
+    contract_addresses:
+      bsc: "0x0d5550d52428e7e3175bfc9550207e4ad3859b17"  # xác nhận qua getsourcecode that (ContractName=
+      # TornadoProxyLight) — bien the Tornado Cash tren BSC. Xac nhan hanh vi mixer that qua internal tx:
+      # contract nay GUI TIEN NOI BO toi nhieu dia chi KHONG lien quan (khac nhau moi lan), gasUsed dong
+      # nhat ~893956 (khop chu ky zk-SNARK verify cua Tornado withdraw()) — mau hinh rut tien mixer dien
+      # hinh. Phat hien khi dieu tra leakage giua hackerdao_2022 & new_free_dao_2022 (2026-08-28) - CA HAI
+      # bao cao CertiK/Halborn deu neu "chuyen vao Tornado Cash" nhung truoc do khong bat duoc vi contract
+      # nay chua co trong protocol_map — nay xac nhan dung la endpoint mixer that duoc bao cao.
+    linking_evidence: "onchain_function_signature_confirmed"
+    verify_status: "verified_onchain_2026-08-28"
+
+# Lending/money-market protocol — KHÔNG phải bridge/DEX/mixer, nhưng vẫn cần
+# verify độc lập trước khi dùng để gắn nhãn (cùng nguyên tắc mục 1 — không
+# suy đoán từ tên/memory). Thêm 2026-08-13 để đối chiếu bsc_token_hub_2022
+# với báo cáo công khai (Elliptic: "900,000 newly-minted BNB... deposited as
+# collateral on Venus Protocol") — xem metadata/annotation_guide.md.
+lending_protocols:
+  - name: "Venus Protocol"
+    chains: ["bsc"]
+    contract_addresses:
+      bsc: "0xa07c5b74c9b40447a954e1466938b865b6bbea36"  # vBNB Token — xác nhận qua BscScan token label "Venus: vBNB Token" + đối chiếu độc lập qua Blockscan/Bitquery explorer 2026-08-13 (KHÔNG phải từ memory). Địa chỉ này xuất hiện trực tiếp trong raw data thật của seed bsc_token_hub_2022 (0x489a8756...): 3 tx external BNB gửi tới đây (600,000 + 300,000 + 0.1 = 900,000.1 BNB) kèm vBNB mint về đúng seed cùng tx_hash — khớp CHÍNH XÁC "900,000 BNB" báo cáo Elliptic.
+    linking_evidence: "onchain_exact_amount_match_public_report (900,000.1 BNB vs báo cáo 900,000 BNB)"
+    verify_status: "verified_onchain_2026-08-13"
+

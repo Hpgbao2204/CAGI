@@ -1,0 +1,62 @@
+# Canonical event schema — xem tài liệu phản biện gốc mục 5.4
+event_schema:
+  required_fields:
+    - chain_id
+    - block_number
+    - timestamp
+    - tx_hash
+    - log_index
+    - src
+    - dst
+    - event_type   # transfer | bridge_deposit | bridge_withdraw | lending_deposit | lending_withdraw | swap | split | merge | mixer_or_exit | other
+    - amount_norm
+
+  recommended_fields:
+    - protocol
+    - token
+    - counterparty_type
+    - source_confidence
+
+feature_groups:
+  temporal:
+    - time_to_first_bridge
+    - inter_action_gaps
+    - burstiness
+    - active_duration
+    - bridge_latency_percentile
+  structural:
+    - fan_out
+    - fan_in
+    - unique_counterparties
+    - local_ego_density
+    - path_depth
+    - branch_count
+  economic:
+    - log_amount
+    - outgoing_incoming_ratio
+    - value_retention
+    - token_category_diversity
+    - fee_percentile
+  semantic_action:
+    - action_counts
+    - action_bigram_trigram
+    - num_bridge_families
+    - swap_after_bridge
+    - stablecoin_pivot
+  motif:
+    - split
+    - merge
+    - peel_like_chain
+    - bridge_then_swap
+    - swap_then_split
+    - nested_bridge
+    - rapid_token_pivot
+  context:
+    - known_mixer_interaction
+    - public_exit_service_label
+    - protocol_category
+
+anti_leakage_rules:
+  - "Feature tại prefix k chỉ dùng event <= k"
+  - "Motif cần future event để xác nhận phải bị loại hoặc đổi thành 'chưa hoàn tất'"
+  - "Endpoint/mixer/CEX không được dùng làm feature khi mục tiêu là cảnh báo trước endpoint"

@@ -1,0 +1,39 @@
+{
+  "raw_mining": 274,
+  "usable_mining": 264,
+  "n_empty_mining": 10,
+  "n_original_controls": 5,
+  "usable_total": 269,
+  "total_prefix_rows": 608,
+  "positive_prefix_rows": 31,
+  "negative_prefix_rows": 577,
+  "empty_rate_by_incident": {
+    "ronin_bridge_2022": {
+      "checked": 69,
+      "empty": 4
+    },
+    "deltaprime_arbitrum_2024": {
+      "checked": 70,
+      "empty": 4
+    },
+    "bsc_token_hub_2022": {
+      "checked": 69,
+      "empty": 2
+    },
+    "qbridge_qubit_2022": {
+      "checked": 35,
+      "empty": 0
+    },
+    "feg_bridge_2024": {
+      "checked": 31,
+      "empty": 0
+    }
+  },
+  "per_incident_hn_count": {
+    "deltaprime_arbitrum_2024": 70,
+    "ronin_bridge_2022": 69,
+    "bsc_token_hub_2022": 69,
+    "qbridge_qubit_2022": 35,
+    "feg_bridge_2024": 31
+  }
+}

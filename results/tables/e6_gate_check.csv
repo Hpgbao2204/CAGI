@@ -1,0 +1,17 @@
+incident_id,chain,contract,n_total_candidates,n_already_matched,n_excluded_other,n_no_cache_unknown,n_checkable_from_cache,n_pass_structural_filter,n_fail_structural_filter,reject_reasons
+ronin_bridge_2022,eth,0x1a2a1c938ce3ec39b6d47113c7955baa9dd454f2,1299,79,1,1186,32,9,23,"{'fan_out_split_like_pattern': 15, 'zero_volume': 5, 'unexpected_mixer_followup': 2, 'no_direct_interaction_with_contract': 1}"
+ronin_bridge_2022,eth,0xe592427a0aece92de3edee1f18e0157c05861564,0,0,0,0,0,0,0,{}
+ronin_bridge_2022,eth,0x1111111254fb6c44bac0bed2854e76f90643097,0,0,0,0,0,0,0,{}
+qbridge_qubit_2022,bsc,0x10ed43c718714eb63d5aa57b78b54704e256024e,619,47,1,484,87,1,86,"{'fan_out_split_like_pattern': 77, 'no_direct_interaction_with_contract': 8, 'zero_volume': 1}"
+feg_bridge_2024,eth,0xd90e2f925da726b50c4ed8d0fb90ad053324f31b,149,41,1,14,92,1,91,"{'multiple_mixer_events_unusual': 81, 'fan_out_split_like_pattern': 9, 'no_direct_interaction_with_contract': 1}"
+deltaprime_arbitrum_2024,arbitrum,0xe35e9842fceaca96570b734083f4a58e8f7c5f2a,330,80,0,194,56,0,56,"{'fan_out_split_like_pattern': 49, 'zero_volume': 6, 'no_direct_interaction_with_contract': 1}"
+bsc_token_hub_2022,bsc,0x0000000000000000000000000000000000001004,1215,79,0,1091,45,4,41,"{'fan_out_split_like_pattern': 40, 'zero_volume': 1}"
+chibi_finance_2023,arbitrum,0xbf22f0f184bccbea268df387a49ff5238dd23e40,421,35,0,376,10,0,10,{'fan_out_split_like_pattern': 10}
+wooppv2_2024,arbitrum,0xbf22f0f184bccbea268df387a49ff5238dd23e40,452,35,0,408,9,5,4,{'fan_out_split_like_pattern': 4}
+utopiasphere_2024,bsc,0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae,559,34,0,507,18,0,18,"{'fan_out_split_like_pattern': 13, 'zero_volume': 4, 'no_direct_interaction_with_contract': 1}"
+xkingdom_2024,arbitrum,0xbf22f0f184bccbea268df387a49ff5238dd23e40,464,33,0,428,3,1,2,{'fan_out_split_like_pattern': 2}
+wault_finance_2021,bsc,0x6f817a0ce8f7640add3bc0c1c2298635043c2423,0,0,0,0,0,0,0,{}
+wault_finance_2021,bsc,0x10ed43c718714eb63d5aa57b78b54704e256024e,648,34,0,526,88,0,88,"{'fan_out_split_like_pattern': 84, 'no_direct_interaction_with_contract': 4}"
+paraluni_2022,bsc,0x10ed43c718714eb63d5aa57b78b54704e256024e,552,33,0,432,87,1,86,"{'fan_out_split_like_pattern': 80, 'no_direct_interaction_with_contract': 4, 'zero_volume': 2}"
+circulate_2023,bsc,0xd1c5966f9f5ee6881ff6b261bbeda45972b1b5f3,0,0,0,0,0,0,0,{}
+circulate_2023,bsc,0x10ed43c718714eb63d5aa57b78b54704e256024e,0,0,0,0,0,0,0,{}

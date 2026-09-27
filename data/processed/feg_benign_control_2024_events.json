@@ -1,0 +1,17 @@
+[
+  {
+    "chain_id": 1,
+    "block_number": 21505477,
+    "timestamp": "2024-12-29T03:35:35Z",
+    "tx_hash": "0xd78070a5b1cc300eba9f95513edfa9369b687e0e891eb664f9fa699a60b662ea",
+    "log_index": 0,
+    "src": "0xd157c658728da3c1ae8c521bd03352ead8c8e6bc",
+    "dst": "0xd90e2f925da726b50c4ed8d0fb90ad053324f31b",
+    "event_type": "mixer_or_exit",
+    "amount_norm": 2.3978952727983707,
+    "protocol": "Tornado Cash Router",
+    "token": "ETH",
+    "counterparty_type": null,
+    "source_confidence": 1.0
+  }
+]

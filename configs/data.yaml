@@ -1,0 +1,67 @@
+# Cấu hình nguồn dữ liệu — xem proposal_revision_v1.md mục 4 để biết lý do các lựa chọn dưới đây
+
+chains:
+  - eth
+  - bsc
+  - arbitrum
+  # thêm chain khi mở rộng, tối đa 2-4 chain theo in-scope
+
+# Địa chỉ counterparty được LUÔN giữ trong trajectory bất kể value_share —
+# lấy trực tiếp từ metadata/protocol_map.yaml (chỉ entry đã verify_status
+# "verified*", KHÔNG dùng entry CHƯA_VERIFY). Cập nhật đồng bộ khi
+# protocol_map.yaml có entry mới đã verify. Lý do bắt buộc phải có allowlist
+# (không thể chỉ dựa value_share): xem comment TrajectoryConfig.allowlist
+# trong src/trajectories/builder.py — so sánh "share" trên số lượng token
+# thô giữa các token khác nhau (vd WBTC vs USDC) không có ý nghĩa nếu không
+# có dữ liệu giá quy đổi USD (bug thật phát hiện ở DeltaPrime 2026-08-13).
+bridge_allowlist:
+  - "0x1a2a1c938ce3ec39b6d47113c7955baa9dd454f2"  # Ronin Bridge (eth)
+  - "0x0000000000000000000000000000000000001004"  # BSC Token Hub (bsc)
+  - "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae"  # LI.FI Diamond (bsc)
+  - "0x6f817a0ce8f7640add3bc0c1c2298635043c2423"  # Multichain (AnySwap) anyETH Token, legacy 2021 (bsc)
+  - "0x3ee18b2214aff97000d974cf647e7c347e8fa585"  # Wormhole Token Bridge (Portal) (eth)
+  - "0x8731d54e9d02c286767d56ac03e8037c07e01e98"  # Stargate (LayerZero) (eth)
+  - "0xbf22f0f184bccbea268df387a49ff5238dd23e40"  # Stargate (LayerZero) ETH Router (arbitrum)
+  - "0x650af55d5877f289837c30b94af91538a7504b76"  # Multichain (AnySwap) Router V6 (arbitrum)
+  - "0xe35e9842fceaca96570b734083f4a58e8f7c5f2a"  # Across Protocol SpokePool (arbitrum)
+
+dex_allowlist:
+  - "0x7a250d5630b4cf539739df2c5dacb4c659f2488d"  # Uniswap V2 (eth)
+  - "0x10ed43c718714eb63d5aa57b78b54704e256024e"  # PancakeSwap V2 (bsc)
+  - "0xe592427a0aece92de3edee1f18e0157c05861564"  # Uniswap V3 SwapRouter (eth)
+  - "0x1111111254fb6c44bac0bed2854e76f90643097d"  # 1inch v4 AggregationRouter (eth) - FIX 2026-08-14: thiếu ký tự cuối "d", xem protocol_map.yaml
+  - "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640"  # Uniswap V3: USDC 3 (pool, eth) - phát hiện 2026-08-14, xem protocol_map.yaml
+  - "0xdef171fe48cf0115b1d80b88dc8eab59176fee57"  # Velora v5: Augustus Swapper / ParaSwap (bsc) - phát hiện 2026-08-14, xem protocol_map.yaml
+
+mixer_allowlist:
+  - "0xd90e2f925da726b50c4ed8d0fb90ad053324f31b"  # Tornado Cash Router (eth)
+  - "0x0d5550d52428e7e3175bfc9550207e4ad3859b17"  # TornadoProxyLight (bsc) — xác nhận onchain 2026-08-28
+
+# Lending/money-market protocol — hạ tầng dùng chung (không phải bridge/DEX/
+# mixer nhưng cùng lý do phải allowlist: gửi vào 1 lending market là "sink"
+# tương tự bridge_deposit, không nên bị coi là split/dust vì value_share so
+# trên raw amount đa-token không có ý nghĩa). Thêm 2026-08-13 sau khi phát
+# hiện bsc_token_hub_2022 thiếu hẳn 900,000 BNB deposit vào Venus Protocol
+# (khớp CHÍNH XÁC báo cáo Elliptic "900,000 newly-minted BNB... deposited as
+# collateral on Venus Protocol") — dữ liệu on-chain CÓ (10 bản ghi trùng do
+# BSCTrace pagination overlap, dedup đúng còn 3 tx thật: 600,000 + 300,000 +
+# 0.1 BNB = 900,000.1, khớp báo cáo), nhưng trajectory builder trước đây
+# không nhận diện Venus nên bỏ sót hoàn toàn nhánh dòng tiền chính này.
+lending_allowlist:
+  - "0xa07c5b74c9b40447a954e1466938b865b6bbea36"  # Venus: vBNB Token (bsc) - xác nhận qua BscScan token label + Blockscan/Bitquery explorer 2026-08-13, không phải từ memory
+
+trajectory:
+  max_depth: 6
+  time_horizon_hours: 72
+  min_tainted_share: 0.05   # ngưỡng giữ outgoing branch (5% tainted inflow)
+
+incident_source:
+  candidates_csv: metadata/incident_candidates_amlguard.csv  # chỉ dùng làm seed ứng viên
+  target_min_incidents: 6
+  target_max_incidents: 10
+  ground_truth: self_annotated  # KHÔNG dùng ground truth AMLGuard — chưa công khai
+
+explorer_api:
+  provider: null       # điền tên/API key khi cấu hình (không commit key thật)
+  rate_limit_per_sec: 2
+  cache_dir: data/raw

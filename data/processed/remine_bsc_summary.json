@@ -1,0 +1,17 @@
+{
+  "summary": [
+    {
+      "incident_id": "qbridge_qubit_2022",
+      "accepted": 34,
+      "checked": 100,
+      "elapsed_sec": 3.5
+    },
+    {
+      "incident_id": "bsc_token_hub_2022",
+      "accepted": 70,
+      "checked": 102,
+      "elapsed_sec": 1.0
+    }
+  ],
+  "total_accepted": 104
+}

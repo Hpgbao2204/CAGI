@@ -1,0 +1,17 @@
+[
+  {
+    "chain_id": 42161,
+    "block_number": 273270966,
+    "timestamp": "2024-11-11T07:03:35Z",
+    "tx_hash": "0xa203d17b535bc05dd7559a571c0e9a32caf18841939aad1f760b129ba88d3fe7",
+    "log_index": 0,
+    "src": "0xd643f6d2d0bce541569ec0d7f78b532468ecd5d3",
+    "dst": "0xe35e9842fceaca96570b734083f4a58e8f7c5f2a",
+    "event_type": "bridge_deposit",
+    "amount_norm": 0.022739486969489426,
+    "protocol": "Across Protocol SpokePool (Arbitrum)",
+    "token": "ETH",
+    "counterparty_type": null,
+    "source_confidence": 1.0
+  }
+]

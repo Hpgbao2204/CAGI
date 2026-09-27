@@ -1,0 +1,533 @@
+{
+  "chibi_finance_2023": [
+    {
+      "address": "0xc2825494a86716c1fee3c4ed0fa7176b870fc75b",
+      "chain": "arbitrum",
+      "block_number": 104560200,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x53bf833a5d6c4dda888f69c22c88c9f356a41614",
+      "chain": "arbitrum",
+      "block_number": 104560200,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xf88fe93701374b7b362ff00abf9ae4be00c26e9e",
+      "chain": "arbitrum",
+      "block_number": 104560308,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x7c2fb1d06331bb98bc76574a4d38d5b175beeedb",
+      "chain": "arbitrum",
+      "block_number": 104560373,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xab4416ab38702905244cfe868d1d218bd4dcb8a2",
+      "chain": "arbitrum",
+      "block_number": 104560479,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xa6f11b6b0da7555b8c4624633ea76a124ece54a7",
+      "chain": "arbitrum",
+      "block_number": 104560497,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xef25712544465fcc2c5a87b4b367e80674711df2",
+      "chain": "arbitrum",
+      "block_number": 104560505,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x9fb4eb8cdd70a6a52083a6ea8f29d02f188ebd7f",
+      "chain": "arbitrum",
+      "block_number": 104560513,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x349b1fdc5ac0a4cca926ea7d405d2fa161caa47f",
+      "chain": "arbitrum",
+      "block_number": 104560653,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x6d91febf17b921afd38f4c91ccdff093d6bbfc82",
+      "chain": "arbitrum",
+      "block_number": 104560712,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x19d22c3b701b9c4ceca2c6f6dd41ca07c262936d",
+      "chain": "arbitrum",
+      "block_number": 104560723,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xb282727c75ff199c2346206da81d8d661dcc9f04",
+      "chain": "arbitrum",
+      "block_number": 104560757,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x5f010f2c0b515a03059545faae5ec1c0e6978c09",
+      "chain": "arbitrum",
+      "block_number": 104560762,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x3f915d1b8b573768ec82bbfe319adc9f8cec49b2",
+      "chain": "arbitrum",
+      "block_number": 104560795,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x3c71d0510dca7c4b1b3533b1a0c3e95716c30aec",
+      "chain": "arbitrum",
+      "block_number": 104560910,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x5c70d62b91399ae9d161b74b7d00cfa7bcd41acb",
+      "chain": "arbitrum",
+      "block_number": 104560951,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x0ee0f5850fd34f14a442ebe3f00b3c50629cfc12",
+      "chain": "arbitrum",
+      "block_number": 104560997,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xf531866c2f5483eb1f192454809956a8241165da",
+      "chain": "arbitrum",
+      "block_number": 104561182,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x607dbde7e6734b10bce590fce139a9b41a0d8f4d",
+      "chain": "arbitrum",
+      "block_number": 104561226,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xd301e34c48f9a2e49611e04e086cbc776c4d3063",
+      "chain": "arbitrum",
+      "block_number": 104561252,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xcec077e7dd3156c64f25a5fb2e02625f10d09476",
+      "chain": "arbitrum",
+      "block_number": 104561400,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xee5c9550d1d56a921a63db0ac788b7ef15a2a436",
+      "chain": "arbitrum",
+      "block_number": 104561473,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xa20cec2ddb08ea48499e0e9b11678b87aef4f4eb",
+      "chain": "arbitrum",
+      "block_number": 104561577,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x4fa8f58dd684a17aa82c8fe1d0c7d92a91978062",
+      "chain": "arbitrum",
+      "block_number": 104561614,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xef88bc619d233a72fcd43ae924134e88306724dd",
+      "chain": "arbitrum",
+      "block_number": 104561617,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    }
+  ],
+  "wooppv2_2024": [
+    {
+      "address": "0x3d5325744dffe3e108a88d60bd960dd6db1b7aa0",
+      "chain": "arbitrum",
+      "block_number": 186575484,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x915a55e36a01285a14f05de6e81ed9ce89772f8e",
+      "chain": "arbitrum",
+      "block_number": 186575484,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x980d66d365a38ddeb43b500c00558a804b4c942a",
+      "chain": "arbitrum",
+      "block_number": 186575489,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x77dc85acb51f9e0db15d62c8c294a14c9252abfb",
+      "chain": "arbitrum",
+      "block_number": 186575492,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x1b49c59ad2b1adb4ccf5607c23b5fc9d3d5f532d",
+      "chain": "arbitrum",
+      "block_number": 186575504,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xbdd574f03104ffeab05a26fbf3d896577baadfbc",
+      "chain": "arbitrum",
+      "block_number": 186575531,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xe0ecb3509041ecc1fda6cb680648c1250eaf6583",
+      "chain": "arbitrum",
+      "block_number": 186575610,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x30ca5c3759b986bb8d324ed2983023710503c99a",
+      "chain": "arbitrum",
+      "block_number": 186575615,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xef26993fc136be269efb8e7624e29750c647a376",
+      "chain": "arbitrum",
+      "block_number": 186575886,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xd8c92c382678ef5fe1b2101639c94c7f752c110b",
+      "chain": "arbitrum",
+      "block_number": 186575895,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xdcb0d9294239cbf3c9464b8430e6efb39b1933aa",
+      "chain": "arbitrum",
+      "block_number": 186576051,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x7bbf5e017b932dda39376fe3e140b50f973cba7f",
+      "chain": "arbitrum",
+      "block_number": 186576267,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x47e90e622b99cba98896977a432f95d8ab27d002",
+      "chain": "arbitrum",
+      "block_number": 186576320,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x9a24d54d88998979df977f61a632557c8cea0d7d",
+      "chain": "arbitrum",
+      "block_number": 186576373,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0xc3ab2bfd99875629fceb1643ecfcfc99b50bbb1c",
+      "chain": "arbitrum",
+      "block_number": 186576404,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x212aefea11954292138900dbfc820512eb585a53",
+      "chain": "arbitrum",
+      "block_number": 186576413,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x3843df9c01d4e22e0d0087258f6f06a0a3b6f8aa",
+      "chain": "arbitrum",
+      "block_number": 186576510,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x71c8cd0d18c0f8b3f7ed36a4dd4c3b20888752f7",
+      "chain": "arbitrum",
+      "block_number": 186576553,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x9bec0150a9268185b58ddbaa527335d246dee4f0",
+      "chain": "arbitrum",
+      "block_number": 186576592,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x998a23c8c192c550da6c8a0262658b69f2769e23",
+      "chain": "arbitrum",
+      "block_number": 186576605,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x36f366e941e2a5e66489a719ac937a1f5e003244",
+      "chain": "arbitrum",
+      "block_number": 186576647,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x141095709de0960ad5a57475f174e4bb18662959",
+      "chain": "arbitrum",
+      "block_number": 186576679,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x1981bda8e86728ef726ba1eb16842a15256f9dcb",
+      "chain": "arbitrum",
+      "block_number": 186576686,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x3ceb91a37d8d641db6b348e6ebd0b6f15b59c59d",
+      "chain": "arbitrum",
+      "block_number": 186576687,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    },
+    {
+      "address": "0x053f0aa7b371b84731a138058de4ff9bee7dc666",
+      "chain": "arbitrum",
+      "block_number": 186576758,
+      "contract_used": "0xbf22f0f184bccbea268df387a49ff5238dd23e40",
+      "protocol_name": "Stargate (LayerZero)"
+    }
+  ],
+  "utopiasphere_2024": [
+    {
+      "address": "0x6b47d7d550dd4df7a9a3f13d7c210ec9c66cfb6a",
+      "chain": "bsc",
+      "block_number": 40462385,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0xbd6c7b0d2f68c2b7805d88388319cfb6ecb50ea9",
+      "chain": "bsc",
+      "block_number": 40462385,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0xe60dc00744072039c41392720d9f13e696b07df9",
+      "chain": "bsc",
+      "block_number": 40462394,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x773c309bd65d8de16869d195d08e6b75013f094c",
+      "chain": "bsc",
+      "block_number": 40462414,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x70d2ca67d5394de1be51c359e84d38eee03b6015",
+      "chain": "bsc",
+      "block_number": 40462504,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0xb36b64d3463c0e595da4bc4e29a9f3b60fc1d89b",
+      "chain": "bsc",
+      "block_number": 40462544,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x219b3deeaa89217e92a2d353cee2886f5f26f11b",
+      "chain": "bsc",
+      "block_number": 40462550,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x7e9ac4845461c64ad31ef20eb233fc68b514b769",
+      "chain": "bsc",
+      "block_number": 40462551,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0xff994acc57744b8f35fa7ead0af0495426308416",
+      "chain": "bsc",
+      "block_number": 40462570,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x8e17f347ad8b56175148f1659c10090cd599c7f3",
+      "chain": "bsc",
+      "block_number": 40462595,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0xfa4c091de0b1442d20610a2a8b89d324ad1ce840",
+      "chain": "bsc",
+      "block_number": 40462601,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x8a2404fde85f94d46bc55464e2df04c72bd9ee19",
+      "chain": "bsc",
+      "block_number": 40462707,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0xc530c67aa9fd1952a26687230354411e2645dd3f",
+      "chain": "bsc",
+      "block_number": 40462708,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0xcd401c10afa37d641d2f594852da94c700e4f2ce",
+      "chain": "bsc",
+      "block_number": 40464875,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0xad7cc86b9db44fe6a75e37a70124d58c01ae05d8",
+      "chain": "bsc",
+      "block_number": 40462735,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x1f7b96e393522ad6d20bfcfa2180cb732d298018",
+      "chain": "bsc",
+      "block_number": 40462740,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0xeb1515543ebecf47b35bed7a2a757fd32260583e",
+      "chain": "bsc",
+      "block_number": 40462740,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x1ef94f1fab0b34308d39b3459711e6543ca593f4",
+      "chain": "bsc",
+      "block_number": 40462751,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x551c2ff96a66f8be04c92ba00f36b534e12a2a81",
+      "chain": "bsc",
+      "block_number": 40462820,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x27235ab059c9fd9baf436dbed70980d4a23219df",
+      "chain": "bsc",
+      "block_number": 40462845,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x2088e0d5f3d5d9a2d3d5f0cc8444ff1278089219",
+      "chain": "bsc",
+      "block_number": 40462861,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0xc1f429870ff4bfa52c3d3623d7406ffad4f02a3f",
+      "chain": "bsc",
+      "block_number": 40462873,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x62003975cbd5925a8783e58816fa9fdb4accdd54",
+      "chain": "bsc",
+      "block_number": 40462892,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x3139664c164ab645f3ca097d6f27eb3dd6c3ba8a",
+      "chain": "bsc",
+      "block_number": 40462902,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    },
+    {
+      "address": "0x489fc638b2f4e08ff15203a9d34b2439f4ad6093",
+      "chain": "bsc",
+      "block_number": 40462904,
+      "contract_used": "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae",
+      "protocol_name": "LI.FI Diamond"
+    }
+  ]
+}

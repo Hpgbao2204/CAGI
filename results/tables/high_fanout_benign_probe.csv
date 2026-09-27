@@ -1,0 +1,2 @@
+candidate_id,entity_name,entity_type,chain,public_label,n_actions,fan_out,branch_count,unique_counterparties,m1_prob,m1_flagged_positive_at_0.5
+binance_hot_wallet_20,Binance,exchange_hot_wallet,bsc,Binance: Hot Wallet 20,2,1.0,1.0,1.0,0.00010120218939846382,False

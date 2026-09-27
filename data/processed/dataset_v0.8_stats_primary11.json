@@ -1,0 +1,10 @@
+{
+  "raw_mining": 414,
+  "usable_mining": 403,
+  "n_empty_mining": 11,
+  "n_original_controls": 5,
+  "usable_total": 408,
+  "total_prefix_rows": 1002,
+  "positive_prefix_rows": 75,
+  "negative_prefix_rows": 927
+}

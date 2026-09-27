@@ -1,0 +1,13 @@
+pandas
+scikit-learn
+xgboost
+pyarrow
+pyyaml
+requests
+pytest
+matplotlib
+pydantic>=2
+python-dotenv
+joblib
+psutil
+scipy

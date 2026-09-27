@@ -1,0 +1,137 @@
+[
+  {
+    "incident_id": "ronin_bridge_2022",
+    "chain": "eth",
+    "n_actions_before": 7,
+    "n_actions_after": 8,
+    "changed": true,
+    "n_processed_before": 5,
+    "n_processed_after": 5
+  },
+  {
+    "incident_id": "ronin_benign_control_2022",
+    "chain": "eth",
+    "n_actions_before": 1,
+    "n_actions_after": 5,
+    "changed": true,
+    "n_processed_before": 2,
+    "n_processed_after": 4
+  },
+  {
+    "incident_id": "feg_bridge_2024",
+    "chain": "eth",
+    "n_actions_before": 9,
+    "n_actions_after": 9,
+    "changed": false,
+    "n_processed_before": 1,
+    "n_processed_after": 1
+  },
+  {
+    "incident_id": "deltaprime_arbitrum_2024",
+    "chain": "arbitrum",
+    "n_actions_before": 4,
+    "n_actions_after": 4,
+    "changed": false,
+    "n_processed_before": 2,
+    "n_processed_after": 2
+  },
+  {
+    "incident_id": "bsc_token_hub_2022",
+    "chain": "bsc",
+    "n_actions_before": 66,
+    "n_actions_after": 73,
+    "changed": true,
+    "n_processed_before": 5,
+    "n_processed_after": 4
+  },
+  {
+    "incident_id": "qbridge_benign_control_2022",
+    "chain": "bsc",
+    "n_actions_before": 1,
+    "n_actions_after": 1,
+    "changed": false,
+    "n_processed_before": 1,
+    "n_processed_after": 1
+  },
+  {
+    "incident_id": "feg_benign_control_2024",
+    "chain": "eth",
+    "n_actions_before": 1,
+    "n_actions_after": 1,
+    "changed": false,
+    "n_processed_before": 1,
+    "n_processed_after": 1
+  },
+  {
+    "incident_id": "deltaprime_benign_control_2024",
+    "chain": "arbitrum",
+    "n_actions_before": 1,
+    "n_actions_after": 1,
+    "changed": false,
+    "n_processed_before": 1,
+    "n_processed_after": 1
+  },
+  {
+    "incident_id": "bsc_token_hub_benign_control_2022",
+    "chain": "bsc",
+    "n_actions_before": 3,
+    "n_actions_after": 3,
+    "changed": false,
+    "n_processed_before": 2,
+    "n_processed_after": 2
+  },
+  {
+    "incident_id": "chibi_finance_2023",
+    "chain": "arbitrum",
+    "n_actions_before": 6,
+    "n_actions_after": 6,
+    "changed": false,
+    "n_processed_before": 2,
+    "n_processed_after": 2
+  },
+  {
+    "incident_id": "wooppv2_2024",
+    "chain": "arbitrum",
+    "n_actions_before": 6,
+    "n_actions_after": 6,
+    "changed": false,
+    "n_processed_before": 2,
+    "n_processed_after": 2
+  },
+  {
+    "incident_id": "utopiasphere_2024",
+    "chain": "bsc",
+    "n_actions_before": 13,
+    "n_actions_after": 14,
+    "changed": true,
+    "n_processed_before": 2,
+    "n_processed_after": 4
+  },
+  {
+    "incident_id": "xkingdom_2024",
+    "chain": "arbitrum",
+    "n_actions_before": 9,
+    "n_actions_after": 9,
+    "changed": false,
+    "n_processed_before": 3,
+    "n_processed_after": 3
+  },
+  {
+    "incident_id": "wault_finance_2021",
+    "chain": "bsc",
+    "n_actions_before": 6,
+    "n_actions_after": 9,
+    "changed": true,
+    "n_processed_before": 3,
+    "n_processed_after": 6
+  },
+  {
+    "incident_id": "paraluni_2022",
+    "chain": "bsc",
+    "n_actions_before": 16,
+    "n_actions_after": 25,
+    "changed": true,
+    "n_processed_before": 3,
+    "n_processed_after": 5
+  }
+]
