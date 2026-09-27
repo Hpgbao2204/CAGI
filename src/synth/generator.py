@@ -156,16 +156,19 @@ def _laundering(b: _Builder, d: float):
 # ----------------------------------------------------------------------
 # Hanh vi binh thuong
 # ----------------------------------------------------------------------
-def _benign(b: _Builder, hard: bool):
+def _benign(b: _Builder, hard: bool, d: float = 0.0):
     rng = b.rng
     tok = NATIVE[b.chain]
-    amount = 10 ** rng.uniform(1.5, 6.5)
+    # d cao -> so tien cua nguoi dung binh thuong tien ve cung dai voi vu
+    # rua tien (ca voi / quy), xoa tin hieu "so tien lon"
+    amount = 10 ** rng.uniform(1.5 + 3.0 * d, 6.5 + 1.0 * d)
     cur = b.seed
     if hard:
         typ = rng.choice(["power_bridge_swap_split", "consolidate_bridge", "fast_rotation"])
     else:
         typ = rng.choice(["bridge_user", "dex_trader", "payroll_split", "consolidation", "arb_bot", "mixer_user"])
-    gap = {"arb_bot": 15, "fast_rotation": 90}.get(typ, rng.uniform(300, 7200))
+    # d cao -> nhip giao dich cua nguoi dung binh thuong nhanh nhu ke rua tien
+    gap = {"arb_bot": 15, "fast_rotation": 90}.get(typ, rng.uniform(300, 7200) * (1 - d) + rng.uniform(60, 600) * d)
     # hoat dong thuong ngay (nhan/gui nho, swap le) de do dai negative chong
     # lan voi positive — tranh model phan biet chi nho do dai
     for _ in range(rng.randint(0, 25 if hard else 15)):
@@ -242,7 +245,7 @@ def generate(n_incidents: int = 30, negatives_per_incident: int = 40, difficulty
         for j in range(negatives_per_incident):
             hard = rng.random() < difficulty
             bn = _Builder(rng, chain, t0 + timedelta(hours=rng.uniform(-72, 72)), "0x" + format(rng.getrandbits(160), "040x"))
-            ntyp = _benign(bn, hard)
+            ntyp = _benign(bn, hard, difficulty)
             if not bn.actions:
                 continue
             items.append(SynthItem(Trajectory(trajectory_id=gid, seed_address=bn.seed, actions=bn.actions, label=0),

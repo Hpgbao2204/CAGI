@@ -45,9 +45,9 @@
   "finished_utc": "2026-09-27T19:55:10.176681+00:00"
  },
  "synth": {
-  "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",
+  "commit": "0bb7e70cf334aa51b48a9e0c9ccdb4131d602658",
   "src_dirty": true,
-  "finished_utc": "2026-09-27T19:55:10.176684+00:00"
+  "finished_utc": "2026-09-27T20:00:54.198269+00:00"
  },
  "gate": {
   "commit": "10efb65c33be2a059b4d97acbbb43af93559bc24",

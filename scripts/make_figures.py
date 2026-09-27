@@ -106,9 +106,8 @@ def fig2():
     ax.barh(y + 0.2, comp["negative"], height=0.38, color=NEG, label="hard negative", hatch="////", edgecolor="white", linewidth=0)
     ax.set_yticks(y, short)
     ax.invert_yaxis()
-    ax.set_xscale("symlog", linthresh=0.01)
     ax.set_xlabel("mean share of actions per trajectory")
-    ax.legend(loc="lower right")
+    ax.legend(loc="center right")
     ax.grid(axis="y", visible=False)
     save(fig, "fig2b")
 
@@ -125,14 +124,14 @@ def fig3():
         ax.step(r, p, where="post", color=C[m], ls=LS[m],
                 label=f"{LABEL[m]}  {main.loc[m, 'pooled_pr_auc']:.3f}")
     ax.axhline(oof.label.mean(), color=NEG, lw=0.8, ls=":")
-    ax.text(0.99, oof.label.mean() + 0.015, f"prevalence {oof.label.mean():.3f}", ha="right", va="bottom", color=INK2, fontsize=6.5)
+    ax.text(0.02, oof.label.mean() - 0.015, f"prevalence {oof.label.mean():.3f}", ha="left", va="top", color=INK2, fontsize=6.5)
     ax.set_xlabel("recall")
     ax.set_ylabel("precision")
     ax.set_ylim(0, 1.02)
     ax.legend(loc="upper right", title="pooled PR-AUC", title_fontsize=6.5)
     save(fig, "fig3a")
 
-    per = csv("rq1_per_incident.csv")
+    per = csv("rq1_per_incident.csv").dropna(subset=["M1", "B3p"])
     fig, ax = plt.subplots(figsize=(W1, H1))
     per = per.sort_values("M1")
     y = np.arange(len(per))
@@ -140,7 +139,7 @@ def fig3():
         ax.plot([a, b], [i, i], color="#c3c2b7", lw=1, zorder=1)
     ax.scatter(per["B3p"], y, marker=MARK["B3p"], color=C["B3p"], s=16, label=LABEL["B3p"], zorder=2)
     ax.scatter(per["M1"], y, marker=MARK["M1"], color=C["M1"], s=16, label=LABEL["M1"], zorder=3)
-    ax.set_yticks(y, [s.replace("_", " ") for s in per["incident_id"]], fontsize=5.5)
+    ax.set_yticks(y, [s.replace("_", " ") for s in per["incident_id"]], fontsize=6)
     ax.set_xlabel("per-incident PR-AUC (held-out fold)")
     ax.set_xlim(-0.02, 1.02)
     ax.grid(axis="y", visible=False)
@@ -183,15 +182,19 @@ def fig4():
     save(fig, "fig4a")
 
     hz = csv("rq2_time_horizons.csv")
+    hzp = csv("rq2_time_horizons_paired.csv").set_index("horizon_min")
     fig, ax = plt.subplots(figsize=(W1, H1))
     x = np.arange(len(hz))
+    for xi, h in zip(x, hz.horizon_min):
+        if hzp.loc[h, "p_value"] < 0.05:
+            ax.text(xi, 0.97, "*", ha="center", va="top", fontsize=10, color=INK)
     for m in ("M1", "B3p"):
         ax.fill_between(x, hz[f"{m}_ci_low"], hz[f"{m}_ci_high"], color=C[m], alpha=0.12, lw=0)
         ax.plot(x, hz[f"{m}_pr_auc"], color=C[m], ls=LS[m], marker=MARK[m], label=LABEL[m])
     ax.plot(x, hz.pos_rate, color=NEG, ls=":", lw=1, label="prevalence")
     lab = {1: "1m", 5: "5m", 15: "15m", 30: "30m", 60: "1h", 180: "3h", 720: "12h", 1440: "24h"}
     ax.set_xticks(x, [lab.get(v, str(v)) for v in hz.horizon_min])
-    ax.set_xlabel("time since first outgoing action (online)")
+    ax.set_xlabel("time since first action (online); * paired $p<0.05$")
     ax.set_ylabel("PR-AUC (95% CI)")
     ax.set_ylim(0, 1.02)
     ax.legend(loc="lower right")
@@ -243,20 +246,22 @@ def fig5():
     per = per[np.isclose(per.theta, 0.5)].copy().sort_values("lead_sec")
     fig, ax = plt.subplots(figsize=(W1, H1))
     y = np.arange(len(per))
-    lead_min = per.lead_sec / 60
+    lead_min = per.lead_sec.to_numpy() / 60
+    tr = lambda v: np.sign(v) * np.log10(1 + np.abs(v))
     colors = [C["M1"] if b else C["B3p"] for b in per.before_endpoint]
     ax.axvline(0, color=INK2, lw=0.8)
-    ax.scatter(np.sign(lead_min) * np.log10(1 + np.abs(lead_min)), y, c=colors, s=18, zorder=3)
+    ax.scatter(tr(lead_min), y, c=colors, s=18, zorder=3)
     for yi, (lm, ls_) in enumerate(zip(lead_min, per.lead_steps)):
-        ax.text(np.sign(lm) * np.log10(1 + abs(lm)) + (0.08 if lm >= 0 else -0.08), yi,
-                f"{lm:+.0f} min, {ls_:+d} steps", va="center", ha="left" if lm >= 0 else "right", fontsize=5.5, color=INK2)
-    ax.set_yticks(y, [s.replace("_", " ") for s in per.incident], fontsize=5.5)
-    ticks = [-1000, -100, -10, 0, 10, 100, 1000]
-    ax.set_xticks([np.sign(t) * np.log10(1 + abs(t)) for t in ticks], [str(t) for t in ticks])
-    ax.set_xlim(-4.2, 4.2)
-    ax.set_xlabel("lead time $t_e - t_a$ at $\\theta$=0.5 (minutes, symlog)")
+        ax.text(1.02, yi, f"{lm:+.0f} min / {ls_:+d} steps", transform=ax.get_yaxis_transform(), va="center",
+                ha="left", fontsize=5.8, color=INK2)
+    ax.set_yticks(y, [s.replace("_", " ") for s in per.incident], fontsize=6)
+    ticks = [-100, -10, 0, 10, 100]
+    ax.set_xticks([tr(t) for t in ticks], [str(t) for t in ticks])
+    ax.set_xlim(-2.6, 2.6)
+    ax.set_xlabel("lead time $t_e-t_a$ at $\\theta$=0.5 (min, symlog)")
     ax.grid(axis="y", visible=False)
-    ax.text(0.98, 0.02, "left of 0: late", transform=ax.transAxes, ha="right", fontsize=6, color=INK2)
+    ax.text(0.02, 0.02, "late", transform=ax.transAxes, fontsize=6, color=C["B3p"])
+    ax.text(0.98, 0.02, "early", transform=ax.transAxes, ha="right", fontsize=6, color=C["M1"])
     save(fig, "fig5b")
 
     # case study: incident co lead time duong lon nhat trong so incident co >=20 action
@@ -280,11 +285,12 @@ def fig5():
         ta = tt[hit[0]]
         ax.axvline(ta, color=INK2, lw=0.8, ls="--")
         ax.text(ta, 1.03, "first alert $t_a$ ", color=INK2, fontsize=6, va="bottom", ha="right")
-    ax.set_xscale("symlog", linthresh=1)
-    ax.set_xlabel(f"minutes since first action ({inc.replace('_', ' ')})")
+    ax.set_xscale("log")
+    ax.set_xlim(left=max(0.1, tt[tt > 0].min() / 1.5) if (tt > 0).any() else 0.1)
+    ax.set_xlabel(f"minutes since first action ({inc.replace('_', ' ')}, log)")
     ax.set_ylabel("score")
-    ax.set_ylim(0, 1.1)
-    ax.legend(loc="lower right")
+    ax.set_ylim(0, 1.12)
+    ax.legend(loc="lower left")
     save(fig, "fig5c")
 
 
@@ -313,7 +319,7 @@ def fig6():
         col = C["M1"] if i >= 5 else INK2
         ax.plot([r.ci_low, r.ci_high], [i, i], color=col, lw=1.2)
         ax.scatter([r.point], [i], color=col, s=16, zorder=3)
-        ax.text(0.99, i, f"{r.point:+.3f}  $p$={r.p_value:.2f}", transform=ax.get_yaxis_transform(), ha="right",
+        ax.text(1.02, i, f"{r.point:+.3f}, $p$={r.p_value:.2f}", transform=ax.get_yaxis_transform(), ha="left",
                 va="center", fontsize=5.8, color=INK2)
     ax.axvline(0, color=INK2, lw=0.7)
     ax.set_yticks(range(len(rows)), [r[2] for r in rows])
@@ -374,8 +380,24 @@ def fig7():
     save(fig, "fig7b")
 
 
+def fig7c():
+    sy = csv("synth_benchmark.csv")
+    fig, ax = plt.subplots(figsize=(W1, H1))
+    for m in ("M1", "B3p", "B3", "B1"):
+        ax.fill_between(sy.difficulty, sy[f"{m}_ci_low"], sy[f"{m}_ci_high"], color=C[m], alpha=0.10, lw=0)
+        ax.plot(sy.difficulty, sy[f"{m}_pr_auc"], color=C[m], ls=LS[m], marker=MARK[m], label=LABEL[m])
+    ax.plot(sy.difficulty, sy.M1_real_to_synth_pr_auc, color=INK2, ls=(0, (1, 1)), marker="x",
+            label="M1 trained on real, tested on synth")
+    ax.plot(sy.difficulty, sy.pos_rate, color=NEG, ls=":", lw=1, label="prevalence")
+    ax.set_xlabel("CAGI-Synth difficulty $d$ (synthetic data)")
+    ax.set_ylabel("pooled PR-AUC (95% CI)")
+    ax.set_ylim(0, 1.02)
+    ax.legend(loc="center left", fontsize=5.8)
+    save(fig, "fig7c")
+
+
 def main():
-    for f in (fig2, fig3, fig4, fig5, fig6, fig7):
+    for f in (fig2, fig3, fig4, fig5, fig6, fig7, fig7c):
         print(f.__name__)
         f()
 
