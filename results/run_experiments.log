@@ -1,0 +1,175 @@
+=== rq1 ===
+pooled rows=1384 pos=116 (0.0838) groups=15
+  B0                     pooled PR-AUC=0.0536  (0s)
+  B1                     pooled PR-AUC=0.2117  (0s)
+  B2                     pooled PR-AUC=0.1166  (0s)
+  B3                     pooled PR-AUC=0.4515  (6s)
+  B3p                    pooled PR-AUC=0.5176  (1s)
+  M1                     pooled PR-AUC=0.4793  (277s)
+  rep:Flat               pooled PR-AUC=0.5176  (1s)
+  rep:Flat+Types         pooled PR-AUC=0.4541  (2s)
+  rep:Flat+Motifs        pooled PR-AUC=0.4996  (1s)
+  rep:Flat+Types+Motifs  pooled PR-AUC=0.4793  (2s)
+  abl:no_temporal        pooled PR-AUC=0.5142  (12s)
+  abl:no_motif           pooled PR-AUC=0.4541  (5s)
+  abl:no_typed_action    pooled PR-AUC=0.4996  (1s)
+  abl:no_bridge_context  pooled PR-AUC=0.5137  (2s)
+  nested_select          pooled PR-AUC=0.4903  choices={'no_bridge': 12, 'with_bridge': 3}
+  -> results/tables/seed_robustness.csv (15 dong)
+           mean       std
+model                    
+B3     0.472426  0.006469
+B3p    0.517574  0.000000
+M1     0.479252  0.000000
+  -> results/tables/rq1_main.csv (15 dong)
+                    model  pooled_pr_auc    ci_low   ci_high  mean_incident_pr_auc
+0                      B0       0.053589  0.036791  0.096627              0.141618
+1                      B1       0.211715  0.124220  0.409774              0.460321
+2                      B2       0.116645  0.068470  0.296601              0.406689
+3                      B3       0.451542  0.276543  0.716411              0.687673
+4                     B3p       0.517574  0.318793  0.734632              0.627590
+5                      M1       0.479252  0.277632  0.758618              0.707895
+6                rep:Flat       0.517574  0.318793  0.734632              0.627590
+7          rep:Flat+Types       0.454137  0.253750  0.763891              0.704152
+8         rep:Flat+Motifs       0.499644  0.301731  0.720653              0.633461
+9   rep:Flat+Types+Motifs       0.479252  0.277632  0.758618              0.707895
+10        abl:no_temporal       0.514169  0.353454  0.711420              0.709583
+11           abl:no_motif       0.454137  0.253750  0.763891              0.704152
+12    abl:no_typed_action       0.499644  0.301731  0.720653              0.633461
+13  abl:no_bridge_context       0.513715  0.303070  0.762470              0.665341
+14          nested_select       0.490340  0.282243  0.752940              0.650429
+  -> results/tables/rq1_paired.csv (12 dong)
+                        a         b     point  boot_mean    ci_low   ci_high  p_value  n_boot_valid
+0                      M1        B3  0.027710   0.026460 -0.087271  0.120669    0.599          2000
+1                      M1       B3p -0.038322  -0.024840 -0.139220  0.067322    0.675          2000
+2                      M1        B1  0.267537   0.272864  0.063896  0.502169    0.010          2000
+3                      M1        B2  0.362607   0.363097  0.156049  0.562275    0.003          2000
+4          rep:Flat+Types  rep:Flat -0.063437  -0.042333 -0.167982  0.069346    0.462          2000
+5         rep:Flat+Motifs  rep:Flat -0.017929  -0.016435 -0.048184  0.018772    0.329          2000
+6   rep:Flat+Types+Motifs  rep:Flat -0.038322  -0.024840 -0.139220  0.067322    0.675          2000
+7           nested_select        M1  0.011088   0.006466 -0.042859  0.078092    0.924          2000
+8         abl:no_temporal        M1  0.034917   0.024561 -0.120661  0.186133    0.748          2000
+9            abl:no_motif        M1 -0.025115  -0.017494 -0.043354  0.018771    0.227          2000
+10    abl:no_typed_action        M1  0.020392   0.008405 -0.083838  0.131465    0.974          2000
+11  abl:no_bridge_context        M1  0.034463   0.026343 -0.035620  0.107240    0.490          2000
+  -> results/tables/rq1_per_incident.csv (15 dong)
+  -> results/tables/rq1_spearman.csv (2 dong)
+      gap   n  rho   p
+0   M1-B3  15  NaN NaN
+1  M1-B3p  15  NaN NaN
+  -> results/tables/nested_selection_choices.csv (15 dong)
+--- stage rq1 xong trong 490s
+=== seq (GRU) ===
+  S1 GRU pooled PR-AUC=0.3678 (93s)
+  -> results/tables/rq1_sequence.csv (1 dong)
+  -> results/tables/rq1_sequence_paired.csv (1 dong)
+{'point': 0.11141584091422868, 'boot_mean': 0.11671214193560803, 'ci_low': -0.11154233399713316, 'ci_high': 0.333601711038396, 'p_value': 0.292, 'n_boot_valid': 2000}
+--- stage seq xong trong 100s
+=== rq2 ===
+  -> results/tables/rq2_checkpoints.csv (8 dong)
+  checkpoint  n_rows  pos_rate  M1_pr_auc  M1_ci_low  M1_ci_high  B3p_pr_auc  M1_mean_incident
+0        k_2     221  0.067873   0.418278   0.203957    0.676256    0.208737          0.675949
+1        k_3     182  0.082418   0.280860   0.158890    0.616996    0.220231          0.596886
+2        k_5     140  0.107143   0.434379   0.237351    0.905353    0.484426          0.762821
+3        k_7     121  0.123967   0.479771   0.252416    0.928953    0.520706          0.840278
+4   ratio_25     408  0.036765   0.483302   0.280484    0.780690    0.565923          0.807692
+5   ratio_50     408  0.036765   0.515143   0.308000    0.820209    0.600825          0.814103
+6   ratio_75     408  0.036765   0.595869   0.353482    0.876647    0.634147          0.768590
+7  ratio_100     408  0.036765   0.702153   0.504819    0.909209    0.810712          0.841880
+  online scoring 221 trajectory trong 7s
+  -> results/tables/rq2_time_horizons.csv (8 dong)
+   horizon_min    n  pos_rate  median_k_pos  median_k_neg  M1_pr_auc  M1_ci_low  M1_ci_high  B3p_pr_auc  B3p_ci_low  B3p_ci_high
+0            1  221  0.067873           2.0           2.0   0.354681   0.193309    0.673353    0.215483    0.119519     0.466267
+1            5  221  0.067873           3.0           2.0   0.355061   0.173393    0.722311    0.358195    0.145410     0.699960
+2           15  221  0.067873           9.0           2.0   0.385859   0.181264    0.735680    0.438816    0.209520     0.748323
+3           30  221  0.067873           9.0           2.0   0.311095   0.159589    0.724886    0.544468    0.309449     0.795231
+4           60  221  0.067873          14.0           2.0   0.358611   0.189711    0.777972    0.639373    0.400542     0.886108
+5          180  221  0.067873          20.0           3.0   0.504274   0.265777    0.864300    0.676860    0.445075     0.903367
+6          720  221  0.067873          39.0           4.0   0.508527   0.317656    0.848250    0.608702    0.379878     0.873808
+7         1440  221  0.067873          40.0           6.0   0.601830   0.449078    0.873175    0.705971    0.535353     0.903044
+  -> results/tables/rq2_alerting.csv (19 dong)
+    theta  n_endpoint  detected_before  late  never  median_lead_sec  q1_lead_sec  q3_lead_sec  pos_alerted_any  n_pos  false_alert_traj  n_neg  false_alert_rate
+5     0.3          10                3     6      1            449.0        381.0       3632.5               14     15                26    206          0.126214
+9     0.5          10                3     5      2            449.0        381.0       3632.5               12     15                12    206          0.058252
+13    0.7          10                1     2      7            449.0        449.0        449.0                5     15                 4    206          0.019417
+17    0.9          10                0     0     10              NaN          NaN          NaN                0     15                 0    206          0.000000
+  -> results/tables/rq2_alerting_per_incident.csv (20 dong)
+--- stage rq2 xong trong 101s
+=== calib ===
+  -> results/tables/calibration.csv (3 dong)
+  -> results/tables/calibration_reliability.csv (28 dong)
+     method     n     brier  brier_ci_low  brier_ci_high       ece  ece_ci_low  ece_ci_high    pr_auc
+0       raw  1384  0.075421      0.051461       0.097779  0.070549    0.038059     0.106064  0.479252
+1  isotonic  1384  0.063226      0.047731       0.093936  0.020916    0.017645     0.074376  0.371912
+2     platt  1384  0.061743      0.046968       0.092616  0.015444    0.014593     0.071314  0.395253
+--- stage calib xong trong 1s
+=== explain ===
+  -> results/tables/shap_global.csv (34 dong)
+                              feature  mean_abs_shap         group
+0                     log_amount_mean       2.080187          flat
+1   action_count_bridge_deposit_ratio       1.398154  typed_action
+2                     value_retention       0.879588          flat
+3               inter_action_gap_mean       0.873785          flat
+4                             fan_out       0.686460          flat
+5                num_distinct_bigrams       0.639155  typed_action
+6                              fan_in       0.459901          flat
+7             motif_rapid_token_pivot       0.371377         motif
+8                          path_depth       0.354959          flat
+9                 active_duration_sec       0.350646          flat
+10        action_count_transfer_ratio       0.284803  typed_action
+11                   stablecoin_pivot       0.244408  typed_action
+  -> results/tables/case_study_shap.csv (8 dong)
+                          incident  k_alert  score_raw  score_platt                                             top1                                            top2                                         top3                                         top4                                 top5
+0               bsc_token_hub_2022       35   0.981618     0.567278                      value_retention=159 (-2.57)                    log_amount_mean=2.61 (+2.39)                             fan_in=1 (+1.87)                            fan_out=7 (+1.61)      num_distinct_trigrams=6 (+1.05)
+1               chibi_finance_2023        2   0.993265     0.622698                     log_amount_mean=2.21 (+1.50)                               fan_out=2 (+0.84)            inter_action_gap_mean=170 (+0.81)  action_count_bridge_deposit_ratio=0 (+0.59)  action_count_swap_ratio=0.5 (+0.53)
+2         deltaprime_arbitrum_2024        2   0.961658     0.627147                     log_amount_mean=2.55 (+2.36)                inter_action_gap_mean=40 (+1.64)  action_count_bridge_deposit_ratio=0 (+0.56)                            fan_out=1 (-0.56)    motif_rapid_token_pivot=0 (-0.33)
+3  magic_abracadabra_arbitrum_2025       31   0.960069     0.554280                    value_retention=0.666 (+1.78)                    log_amount_mean=2.08 (+1.53)                            fan_out=3 (+1.16)              num_distinct_trigrams=9 (+0.72)                 path_depth=4 (-0.69)
+4                new_free_dao_2022       10   0.974078     0.518131                     log_amount_mean=1.68 (+1.20)      action_count_mixer_or_exit_ratio=1 (+1.06)                 value_retention=0.52 (+0.97)             inter_action_gap_mean=99 (+0.87)                    fan_out=1 (-0.87)
+5    radiant_capital_arbitrum_2024        2   0.989399     0.508383                     log_amount_mean=2.57 (+3.51)                inter_action_gap_mean=68 (+1.30)        action_count_transfer_ratio=1 (-0.65)                            fan_out=2 (+0.43)                 path_depth=1 (+0.43)
+6                     wooppv2_2024       14   0.981756     0.578253  action_count_bridge_deposit_ratio=0.143 (-1.81)                    log_amount_mean=1.97 (+1.47)                value_retention=0.567 (+0.94)                            fan_out=3 (+0.89)      num_distinct_trigrams=6 (+0.77)
+7                    xkingdom_2024       42   0.979208     0.520278                                 fan_in=1 (+3.04)  action_count_bridge_deposit_ratio=0.31 (-2.50)              value_retention=0.00477 (+1.65)           inter_action_gap_mean=15.8 (+1.25)     num_distinct_trigrams=12 (+0.91)
+--- stage explain xong trong 0s
+=== stress ===
+  -> results/tables/stress_mimicry_per_incident.csv (60 dong)
+  -> results/tables/stress_mimicry.csv (4 dong)
+   j  detect_rate_0_5  mean_score_25  median_score_25
+0  0         0.800000       0.359419         0.327410
+1  1         0.600000       0.330035         0.289307
+2  2         0.666667       0.282401         0.212534
+3  4         0.666667       0.245999         0.186773
+  -> results/tables/per_bridge_family.csv (15 dong)
+--- stage stress xong trong 7s
+=== synth (CAGI-Synth, du lieu TONG HOP) ===
+{'difficulty': 0.0, 'n_traj': 1230, 'n_rows': 7748, 'pos_rate': 0.0214, 'M1_pr_auc': 0.9993, 'M1_ci_low': 0.9975, 'M1_ci_high': 1.0, 'B3p_pr_auc': 0.998, 'B3p_ci_low': 0.9951, 'B3p_ci_high': 0.9998, 'B3_pr_auc': 0.9982, 'B3_ci_low': 0.9955, 'B3_ci_high': 0.9998, 'B1_pr_auc': 0.1759, 'B1_ci_low': 0.1196, 'B1_ci_high': 0.2337, 'M1_real_to_synth_pr_auc': 0.0146, 'M1_real_to_synth_ci_low': 0.0134, 'M1_real_to_synth_ci_high': 0.0163}
+{'difficulty': 0.25, 'n_traj': 1230, 'n_rows': 7842, 'pos_rate': 0.0245, 'M1_pr_auc': 0.9925, 'M1_ci_low': 0.9839, 'M1_ci_high': 0.999, 'B3p_pr_auc': 0.9906, 'B3p_ci_low': 0.98, 'B3p_ci_high': 0.9985, 'B3_pr_auc': 0.9846, 'B3_ci_low': 0.9691, 'B3_ci_high': 0.996, 'B1_pr_auc': 0.1401, 'B1_ci_low': 0.0831, 'B1_ci_high': 0.1989, 'M1_real_to_synth_pr_auc': 0.0149, 'M1_real_to_synth_ci_low': 0.0135, 'M1_real_to_synth_ci_high': 0.0167}
+{'difficulty': 0.5, 'n_traj': 1230, 'n_rows': 8081, 'pos_rate': 0.0244, 'M1_pr_auc': 0.987, 'M1_ci_low': 0.9704, 'M1_ci_high': 0.9974, 'B3p_pr_auc': 0.9858, 'B3p_ci_low': 0.9679, 'B3p_ci_high': 0.9972, 'B3_pr_auc': 0.9651, 'B3_ci_low': 0.9356, 'B3_ci_high': 0.9873, 'B1_pr_auc': 0.0865, 'B1_ci_low': 0.0512, 'B1_ci_high': 0.1283, 'M1_real_to_synth_pr_auc': 0.0142, 'M1_real_to_synth_ci_low': 0.0134, 'M1_real_to_synth_ci_high': 0.0153}
+{'difficulty': 0.75, 'n_traj': 1230, 'n_rows': 8342, 'pos_rate': 0.026, 'M1_pr_auc': 0.9951, 'M1_ci_low': 0.986, 'M1_ci_high': 0.9998, 'B3p_pr_auc': 0.992, 'B3p_ci_low': 0.9798, 'B3p_ci_high': 0.9994, 'B3_pr_auc': 0.9788, 'B3_ci_low': 0.9566, 'B3_ci_high': 0.9937, 'B1_pr_auc': 0.1011, 'B1_ci_low': 0.0624, 'B1_ci_high': 0.1464, 'M1_real_to_synth_pr_auc': 0.015, 'M1_real_to_synth_ci_low': 0.0143, 'M1_real_to_synth_ci_high': 0.0162}
+{'difficulty': 1.0, 'n_traj': 1230, 'n_rows': 8581, 'pos_rate': 0.0252, 'M1_pr_auc': 0.9949, 'M1_ci_low': 0.9862, 'M1_ci_high': 1.0, 'B3p_pr_auc': 0.9952, 'B3p_ci_low': 0.9873, 'B3p_ci_high': 0.9999, 'B3_pr_auc': 0.994, 'B3_ci_low': 0.9881, 'B3_ci_high': 0.9981, 'B1_pr_auc': 0.0644, 'B1_ci_low': 0.037, 'B1_ci_high': 0.1008, 'M1_real_to_synth_pr_auc': 0.0158, 'M1_real_to_synth_ci_low': 0.0147, 'M1_real_to_synth_ci_high': 0.0195}
+  -> results/tables/synth_benchmark.csv (5 dong)
+--- stage synth xong trong 367s
+=== gate ===
+  -> results/tables/rq3_gate.csv (7 dong)
+{'n_transitions': 11313, 'c1_ge_1000': True, 'min_class_count': 4, 'c2_all_classes_ge_30': False, 'majority_ratio': 0.670467603641828, 'c3_majority_lt_60': False}
+--- stage gate xong trong 0s
+=== runtime ===
+  -> results/tables/runtime.csv (9 dong)
+   n_events  median_ms     p95_ms  peak_mem_mb
+0         2  11.680113  19.466691     0.167697
+1         5  12.413729  17.729596     0.156225
+2        10  12.705148  17.218299     0.130431
+3        25  12.431921  13.066421     0.156539
+4        50  11.806591  18.205510     0.131057
+5       100  11.908066  13.157974     0.156881
+6       250  13.442177  14.082357     0.144387
+7       500  18.012192  18.787085     0.150557
+8       850  23.604640  28.583134     0.158292
+--- stage runtime xong trong 3s
+=== builder ===
+{'expand_iterations': 1, 'min_share': 0.05, 'n_rows': 1227, 'median_pos_len': 20.0, 'M1_pr_auc': 0.6368810865846063, 'M1_ci_low': 0.49769060279892485, 'M1_ci_high': 0.7994467016261133, 'B3p_pr_auc': 0.5580286301077932}
+{'expand_iterations': 1, 'min_share': 0.1, 'n_rows': 1139, 'median_pos_len': 17.0, 'M1_pr_auc': 0.6393397640054659, 'M1_ci_low': 0.4730216700757882, 'M1_ci_high': 0.8273645597910877, 'B3p_pr_auc': 0.6027671547700497}
+{'expand_iterations': 1, 'min_share': 0.2, 'n_rows': 1047, 'median_pos_len': 13.0, 'M1_pr_auc': 0.6790450684501205, 'M1_ci_low': 0.47015004851287534, 'M1_ci_high': 0.8708914600998127, 'B3p_pr_auc': 0.5553132330223521}
+{'expand_iterations': 2, 'min_share': 0.05, 'n_rows': 1384, 'median_pos_len': 40.0, 'M1_pr_auc': 0.4792520130802799, 'M1_ci_low': 0.27763245147269744, 'M1_ci_high': 0.7586182556977598, 'B3p_pr_auc': 0.5175736880937615}
+{'expand_iterations': 2, 'min_share': 0.1, 'n_rows': 1259, 'median_pos_len': 33.0, 'M1_pr_auc': 0.554156185250809, 'M1_ci_low': 0.34281809383538075, 'M1_ci_high': 0.8022970582558075, 'B3p_pr_auc': 0.5223623632865574}
+{'expand_iterations': 2, 'min_share': 0.2, 'n_rows': 1134, 'median_pos_len': 21.0, 'M1_pr_auc': 0.565952785073778, 'M1_ci_low': 0.368120046758331, 'M1_ci_high': 0.8059324590192649, 'B3p_pr_auc': 0.5983779083925299}
+  -> results/tables/builder_sensitivity.csv (6 dong)
+--- stage builder xong trong 131s

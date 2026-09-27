@@ -1,0 +1,9 @@
+incident,k_alert,score_raw,score_platt,top1,top2,top3,top4,top5
+bsc_token_hub_2022,35,0.9816175103187561,0.5672780332871201,value_retention=159 (-2.57),log_amount_mean=2.61 (+2.39),fan_in=1 (+1.87),fan_out=7 (+1.61),num_distinct_trigrams=6 (+1.05)
+chibi_finance_2023,2,0.9932646751403809,0.6226981982225595,log_amount_mean=2.21 (+1.50),fan_out=2 (+0.84),inter_action_gap_mean=170 (+0.81),action_count_bridge_deposit_ratio=0 (+0.59),action_count_swap_ratio=0.5 (+0.53)
+deltaprime_arbitrum_2024,2,0.9616580009460449,0.6271474252036455,log_amount_mean=2.55 (+2.36),inter_action_gap_mean=40 (+1.64),action_count_bridge_deposit_ratio=0 (+0.56),fan_out=1 (-0.56),motif_rapid_token_pivot=0 (-0.33)
+magic_abracadabra_arbitrum_2025,31,0.9600692391395569,0.5542797213805012,value_retention=0.666 (+1.78),log_amount_mean=2.08 (+1.53),fan_out=3 (+1.16),num_distinct_trigrams=9 (+0.72),path_depth=4 (-0.69)
+new_free_dao_2022,10,0.9740779995918274,0.5181314123507279,log_amount_mean=1.68 (+1.20),action_count_mixer_or_exit_ratio=1 (+1.06),value_retention=0.52 (+0.97),inter_action_gap_mean=99 (+0.87),fan_out=1 (-0.87)
+radiant_capital_arbitrum_2024,2,0.9893990755081177,0.5083831707292283,log_amount_mean=2.57 (+3.51),inter_action_gap_mean=68 (+1.30),action_count_transfer_ratio=1 (-0.65),fan_out=2 (+0.43),path_depth=1 (+0.43)
+wooppv2_2024,14,0.9817558526992798,0.5782530867340335,action_count_bridge_deposit_ratio=0.143 (-1.81),log_amount_mean=1.97 (+1.47),value_retention=0.567 (+0.94),fan_out=3 (+0.89),num_distinct_trigrams=6 (+0.77)
+xkingdom_2024,42,0.9792082905769348,0.520278033430255,fan_in=1 (+3.04),action_count_bridge_deposit_ratio=0.31 (-2.50),value_retention=0.00477 (+1.65),inter_action_gap_mean=15.8 (+1.25),num_distinct_trigrams=12 (+0.91)

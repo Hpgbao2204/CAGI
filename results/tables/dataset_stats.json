@@ -1,0 +1,21 @@
+{
+ "n_positive_trajectories": 15,
+ "n_negative_trajectories": 393,
+ "negatives_by_kind": {
+  "hard_negative_mined": 331,
+  "hard_negative_mined_v2_complexity": 57,
+  "hard_negative_control": 5
+ },
+ "n_groups": 15,
+ "n_prefix_rows": 2296,
+ "n_positive_rows": 120,
+ "positive_rate_rows": 0.05226480836236934,
+ "n_pooled_rows_dedup": 1384,
+ "n_endpoint_confirmed": 10,
+ "chains": {
+  "arbitrum": 231,
+  "eth": 119,
+  "bsc": 58
+ },
+ "total_actions": 11721
+}

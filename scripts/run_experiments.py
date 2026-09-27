@@ -322,16 +322,7 @@ def stage_rq1():
     per["trajectory_len"] = per["incident_id"].map(tl)
     write_csv(per, "rq1_per_incident.csv")
 
-    # T7: Spearman gap vs do dai
-    from scipy.stats import spearmanr
-    sp = []
-    for base in ("B3", "B3p"):
-        gap = per["M1"] - per[base]
-        rho, pv = spearmanr(per["trajectory_len"], gap)
-        sp.append({"gap": f"M1-{base}", "n": len(per), "rho": rho, "p": pv})
-    sp = pd.DataFrame(sp)
-    write_csv(sp, "rq1_spearman.csv")
-    log(sp.to_string())
+    stage_spearman()
 
     nested_df = pd.DataFrame(choices).T.reset_index().rename(columns={"index": "held_out"})
     write_csv(nested_df, "nested_selection_choices.csv")
@@ -368,6 +359,22 @@ def stage_seq():
     log(pr)
 
 
+def stage_spearman():
+    """T7: Spearman giua do dai trajectory va chenh lech per-incident PR-AUC.
+    Incident khong co negative (PR-AUC khong xac dinh) bi bo qua."""
+    from scipy.stats import spearmanr
+    per = pd.read_csv(TAB / "rq1_per_incident.csv")
+    sp = []
+    for base in ("B3", "B3p"):
+        d = per[["trajectory_len", "M1", base]].dropna()
+        rho, pv = spearmanr(d["trajectory_len"], d["M1"] - d[base])
+        sp.append({"gap": f"M1-{base}", "n": len(d), "rho": rho, "p": pv,
+                   "excluded_no_negatives": ";".join(per.loc[per[base].isna() | per["M1"].isna(), "incident_id"])})
+    sp = pd.DataFrame(sp)
+    write_csv(sp, "rq1_spearman.csv")
+    log(sp.to_string())
+
+
 # ----------------------------------------------------------------------
 # Stage: rq2
 # ----------------------------------------------------------------------
@@ -380,6 +387,49 @@ def _k_at_horizon(traj, minutes):
     t0 = traj.actions[0].timestamp
     lim = t0 + timedelta(minutes=minutes)
     return sum(1 for a in traj.actions if a.timestamp <= lim)
+
+
+def _horizon_tables(online):
+    """Moc thoi gian online (T15): prefix k(t1+h). So M1 va B3' tren diem RAW
+    (cung learner, chi khac bieu dien) + paired bootstrap tung moc."""
+    rows, pair = [], []
+    for h in HORIZONS_MIN:
+        y, g, pm, pb, ks, kn = [], [], [], [], [], []
+        for o in online:
+            k = int(np.clip(np.sum(o["ts"] <= o["ts"][0] + 60 * h), 2, o["n"]))
+            y.append(o["label"]); g.append(o["group_id"])
+            pm.append(o["raw"][k - 2]); pb.append(o["raw_b3p"][k - 2])
+            (ks if o["label"] == 1 else kn).append(k)
+        y, g, pm, pb = map(np.asarray, (y, g, pm, pb))
+        bm, bb = bootstrap_metric(y, pm, g), bootstrap_metric(y, pb, g)
+        rows.append({"horizon_min": h, "n": len(y), "pos_rate": y.mean(), "median_k_pos": float(np.median(ks)),
+                     "median_k_neg": float(np.median(kn)), "M1_pr_auc": bm["point"], "M1_ci_low": bm["ci_low"],
+                     "M1_ci_high": bm["ci_high"], "B3p_pr_auc": bb["point"], "B3p_ci_low": bb["ci_low"],
+                     "B3p_ci_high": bb["ci_high"]})
+        pair.append({"horizon_min": h, **paired_bootstrap(y, pm, pb, g)})
+    out = pd.DataFrame(rows)
+    write_csv(out, "rq2_time_horizons.csv")
+    write_csv(pd.DataFrame(pair), "rq2_time_horizons_paired.csv")
+    log(out[["horizon_min", "median_k_pos", "M1_pr_auc", "B3p_pr_auc"]].to_string())
+    log(pd.DataFrame(pair)[["horizon_min", "point", "ci_low", "ci_high", "p_value"]].to_string())
+
+
+def stage_rq2paired():
+    """Paired bootstrap M1 vs B3' theo tung checkpoint + tung moc thoi gian."""
+    log("=== rq2paired ===")
+    df, pool, feat_cols = load_pool()
+    oof = pd.read_csv(PROC / "oof_predictions_v3.csv").set_index(["source_id", "prefix_len"])
+    ck = df[META_COLS].copy()
+    for col in ("oof_M1", "oof_B3p"):
+        ck[col] = oof.loc[list(zip(ck.source_id, ck.prefix_len)), col].to_numpy()
+    pr = []
+    for lab in ["k_2", "k_3", "k_5", "k_7", "ratio_25", "ratio_50", "ratio_75", "ratio_100"]:
+        s_ = ck[ck.prefix_label == lab]
+        pr.append({"checkpoint": lab, **paired_bootstrap(s_.label, s_.oof_M1, s_.oof_B3p, s_.group_id)})
+    pr = pd.DataFrame(pr)
+    write_csv(pr, "rq2_checkpoints_paired.csv")
+    log(pr[["checkpoint", "point", "ci_low", "ci_high", "p_value"]].to_string())
+    _horizon_tables(load("online_scores"))
 
 
 def stage_rq2():
@@ -409,7 +459,7 @@ def stage_rq2():
 
     # (b) moc thoi gian (T15) + (c) online moi prefix -> first alert
     b3p = run_loio(subset(FLAT_FEATURES), pool[feat_cols], pool["label"], pool["group_id"])
-    hz_rows, online = [], []
+    online = []
     t_start = time.time()
     for t in trajs:
         fold = res.folds[t["group_id"]]
@@ -417,10 +467,6 @@ def stage_rq2():
         n = len(tr)
         if n < 2:
             continue
-        for h in HORIZONS_MIN:
-            k = max(2, min(n, _k_at_horizon(tr, h)))
-            hz_rows.append({"source_id": t["source_id"], "group_id": t["group_id"], "label": t["label"],
-                            "horizon_min": h, "k": k})
         ks = list(range(2, n + 1))
         Xk = _features_for_prefixes(tr, ks, feat_cols)
         raw = fold.model.predict_proba(Xk)
@@ -433,21 +479,7 @@ def stage_rq2():
     log(f"  online scoring {len(online)} trajectory trong {time.time() - t_start:.0f}s")
     save(online, "online_scores")
 
-    by_src = {o["source_id"]: o for o in online}
-    hz = pd.DataFrame(hz_rows)
-    hz["score"] = [by_src[s]["cal"][k - 2] for s, k in zip(hz.source_id, hz.k)]
-    hz["score_b3p"] = [by_src[s]["raw_b3p"][k - 2] for s, k in zip(hz.source_id, hz.k)]
-    hz_out = []
-    for h, s in hz.groupby("horizon_min"):
-        b = bootstrap_metric(s.label, s.score, s.group_id)
-        bb = bootstrap_metric(s.label, s.score_b3p, s.group_id)
-        hz_out.append({"horizon_min": h, "n": len(s), "pos_rate": s.label.mean(),
-                       "median_k_pos": float(s[s.label == 1].k.median()), "median_k_neg": float(s[s.label == 0].k.median()),
-                       "M1_pr_auc": b["point"], "M1_ci_low": b["ci_low"], "M1_ci_high": b["ci_high"],
-                       "B3p_pr_auc": bb["point"], "B3p_ci_low": bb["ci_low"], "B3p_ci_high": bb["ci_high"]})
-    hz_out = pd.DataFrame(hz_out)
-    write_csv(hz_out, "rq2_time_horizons.csv")
-    log(hz_out.to_string())
+    _horizon_tables(online)
 
     # (d) first alert, lead time, false alert (T2) — tren diem Platt, MOI prefix k>=2
     pos = [o for o in online if o["label"] == 1]
@@ -776,7 +808,7 @@ def stage_runtime():
     (TAB / "runtime_hardware.json").write_text(json.dumps(hw, indent=1))
 
 
-STAGES = {"dataset": stage_dataset, "rq1": stage_rq1, "seq": stage_seq, "rq2": stage_rq2, "calib": stage_calib,
+STAGES = {"dataset": stage_dataset, "rq1": stage_rq1, "spearman": stage_spearman, "seq": stage_seq, "rq2paired": stage_rq2paired, "rq2": stage_rq2, "calib": stage_calib,
           "explain": stage_explain, "stress": stage_stress, "builder": stage_builder,
           "synth": stage_synth, "gate": stage_gate, "runtime": stage_runtime}
 
