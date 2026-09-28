@@ -1,24 +1,30 @@
-venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+venv/
+.venv/
+
+# Secrets (keep only the template)
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Manuscript (kept out of the public repository)
+paper/
+
+# Data and experiment intermediates
 data/raw/*
 !data/raw/.gitkeep
+data/processed/exp/
 *.parquet
-.DS_Store
+logs/
+
+# Tooling / OS
 .claude/
 .git.backup/
-# LaTeX build
-paper/*.aux
-paper/*.log
-paper/*.bbl
-paper/*.blg
-paper/*.out
-paper/*.fls
-paper/*.fdb_latexmk
-paper/*.synctex.gz
-# crawl/experiment intermediates
-data/processed/exp/
-logs/
-paper/*.pdf
-!paper/figures/*.pdf
+.idea/
+.vscode/
+.DS_Store
