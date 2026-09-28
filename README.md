@@ -55,7 +55,7 @@ and run `python scripts/crawl_all.py --chains eth arbitrum` and `--chains bsc`.
 | `src/synth` | CAGI-Synth synthetic generator (reported separately, never mixed with real data) |
 | `scripts` | `crawl_all.py`, `run_experiments.py`, `make_figures.py`, `reproduce_main.sh` |
 | `metadata` | incident registry, hard-negative registries, verified protocol map, group splits |
-| `data` | raw API cache (`raw_archive/`, 84 MB → 1.5 GB) and decoded trajectories (`processed/`) |
+| `data` | raw API cache (`raw_archive/`, 135 MB → 2.4 GB) and decoded trajectories (`processed/`) |
 | `results/tables` | every result table, run manifest and provenance of each trajectory |
 | `paper` | LNCS manuscript, sections and figures |
 
