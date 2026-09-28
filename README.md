@@ -15,16 +15,16 @@ explorer APIs ─► evidence cache ─► semantic decoder ─► value-flow tr
  NodeReal)         SHA-256)           verified contracts)  from the seed)            flat/typed/motif)
 ```
 
-## Results (15 real incidents, 393 hard negatives, leave-one-incident-out)
+## Results (15 real incidents, 514 hard negatives, leave-one-incident-out)
 
 | | |
 |---|---|
-| Incidents alerted (θ = 0.5) | 12 / 15, false alerts on 5.8% of hard negatives |
-| Alert before the exit | 3 of the 6 incidents where it is possible, 5–114 min early |
-| First minute of a flow | typed features double PR-AUC vs. the same model on untyped features (0.42 vs 0.22, p = 0.01) |
-| Over all prefixes | typed 0.48 vs untyped 0.52 (not significant); rule-based typology score 0.21 |
-| Calibration | ECE 0.071 → 0.015 with Platt scaling |
-| Cost | 12–24 ms per scoring on a 4-core CPU, no GPU |
+| Incidents alerted (θ = 0.5) | 9 / 15, false alerts on 2.8% of hard negatives |
+| Incidents alerted (θ = 0.3) | 14 / 15, false alerts on 6.6%; alert before the exit in 3 of the 6 incidents where it is possible, 5–114 min early |
+| First minute of a flow | typed features double PR-AUC vs. the same model on untyped features (0.39 vs 0.17, p = 0.03) |
+| Over all prefixes | typed 0.47 vs untyped 0.51 (not significant); rule-based typology score 0.20 |
+| Calibration | ECE 0.057 → 0.013 with Platt scaling |
+| Cost | 12–30 ms per scoring on a 4-core CPU, no GPU |
 
 Full analysis: `paper/cagi_nss2026.tex`. Every number comes from `results/tables/`.
 
@@ -55,7 +55,7 @@ and run `python scripts/crawl_all.py --chains eth arbitrum` and `--chains bsc`.
 | `src/synth` | CAGI-Synth synthetic generator (reported separately, never mixed with real data) |
 | `scripts` | `crawl_all.py`, `run_experiments.py`, `make_figures.py`, `reproduce_main.sh` |
 | `metadata` | incident registry, hard-negative registries, verified protocol map, group splits |
-| `data` | raw API cache (`raw_archive/`, 135 MB → 2.4 GB) and decoded trajectories (`processed/`) |
+| `data` | raw API cache (`raw_archive/`, 203 MB → 3.2 GB) and decoded trajectories (`processed/`) |
 | `results/tables` | every result table, run manifest and provenance of each trajectory |
 | `paper` | LNCS manuscript, sections and figures |
 
