@@ -1,75 +1,79 @@
-# CAGI-ED: early warning for cross-chain DeFi laundering
+# CAGI-ED
 
-After a DeFi exploit, the attacker moves the stolen funds through fresh wallets,
-DEX swaps and splits into a bridge, mixer or lending market, often within
-minutes. Existing tracers reconstruct that path **after** it is complete.
-CAGI-ED raises the alarm **while it is happening**: it follows the funds from
-the exploiter's address, types every new on-chain action (transfer, swap,
-bridge, lending, split, merge, mixer/exit), and re-scores the growing
-trajectory after each action with a calibrated model. Each alert comes with the
-features and MITRE AADAPT techniques that triggered it.
+**Early warning for cross-chain DeFi laundering.**
+
+After an exploit, stolen funds move through fresh wallets, DEX swaps and splits
+into a bridge or mixer within minutes. CAGI-ED follows the funds from the
+exploiter's address, types each new on-chain action (transfer, swap, bridge,
+lending, split, merge, mixer/exit) and re-scores the growing trajectory after
+every step with a calibrated model, so an alert can fire *before* the funds
+leave. Each alert is explained with TreeSHAP attributions and MITRE AADAPT
+techniques.
 
 ```
-explorer APIs ─► evidence cache ─► semantic decoder ─► value-flow trajectory ─► prefix features ─► XGBoost + Platt ─► alert + TreeSHAP
-(Etherscan V2,    (raw JSON +        (typed actions,      (follow tainted value     (37 features:      (p̂_k ≥ θ ?)
- NodeReal)         SHA-256)           verified contracts)  from the seed)            flat/typed/motif)
+explorer APIs → evidence cache → semantic decoder → value-flow trajectory → prefix features → XGBoost + Platt → alert + SHAP
 ```
 
-## Results (15 real incidents, 514 hard negatives, leave-one-incident-out)
+## Results
 
-| | |
+15 real incidents (2021–2025, Ethereum / BNB Chain / Arbitrum), 514 hard
+negatives, leave-one-incident-out evaluation.
+
+| Metric | Result |
 |---|---|
-| Incidents alerted (θ = 0.5) | 9 / 15, false alerts on 2.8% of hard negatives |
-| Incidents alerted (θ = 0.3) | 14 / 15, false alerts on 6.6%; alert before the exit in 3 of the 6 incidents where it is possible, 5–114 min early |
-| First minute of a flow | typed features double PR-AUC vs. the same model on untyped features (0.39 vs 0.17, p = 0.03) |
-| Over all prefixes | typed 0.47 vs untyped 0.51 (not significant); rule-based typology score 0.20 |
-| Calibration | ECE 0.057 → 0.013 with Platt scaling |
-| Cost | 12–30 ms per scoring on a 4-core CPU, no GPU |
+| Incidents alerted, θ = 0.5 | 9 / 15 at 2.8 % false alerts |
+| Incidents alerted, θ = 0.3 | 14 / 15 at 6.6 % false alerts; 5–114 min before exit in 3 of 6 feasible cases |
+| First-minute PR-AUC, typed vs. untyped features | 0.39 vs. 0.17 (p = 0.03) |
+| Calibration (ECE) | 0.057 → 0.013 with Platt scaling |
+| Scoring latency | 12–30 ms on a 4-core CPU |
 
-Full analysis: `paper/cagi_nss2026.tex`. Every number comes from `results/tables/`.
+All numbers are generated into `results/tables/`.
 
 ## Quick start
 
 ```bash
 pip install -r requirements.txt
-bash scripts/reproduce_main.sh     # all tables + figures from the released trajectories (~30 min, no API key)
 python -m pytest tests -q
-cd paper && latexmk -pdf cagi_nss2026.tex
+bash scripts/reproduce_main.sh          # all tables and figures, ~30 min, no API key needed
 ```
 
-To rebuild from the raw API responses instead:
-`cat data/raw_archive/raw_cache.tar.xz.part* | tar -xJf - -C data/ && bash scripts/reproduce_main.sh --raw`.
-To re-crawl from scratch, set `ETHERSCAN_API_KEY` and `BSCTRACE_API_KEY` (see `.env.example`)
-and run `python scripts/crawl_all.py --chains eth arbitrum` and `--chains bsc`.
+**Rebuild from raw API responses** (134k responses, 3.2 GB unpacked):
 
-## Repository
+```bash
+(cd data/raw_archive && sha256sum -c SHA256SUMS)
+cat data/raw_archive/raw_cache.tar.xz.part* | tar -xJf - -C data/
+bash scripts/reproduce_main.sh --raw
+```
+
+**Re-crawl from scratch:** copy `.env.example` to `.env`, fill in
+`ETHERSCAN_API_KEY` and `BSCTRACE_API_KEY`, then run
+`python scripts/crawl_all.py --chains eth arbitrum` and `--chains bsc`.
+
+## Layout
 
 | Path | Content |
 |---|---|
 | `src/collect` | Etherscan V2 / NodeReal clients, hard-negative miner |
-| `src/normalize` | event schema and semantic decoder |
-| `src/trajectories` | bounded value-flow trajectory builder |
-| `src/features` | prefix-safe features (uses actions 1..k only) |
-| `src/models` | baselines B0–B3, B3′, GRU (S1), CAGI-ED scorer (M1) |
-| `src/evaluation` | leave-one-incident-out, calibration, incident-level bootstrap |
-| `src/synth` | CAGI-Synth synthetic generator (reported separately, never mixed with real data) |
-| `scripts` | `crawl_all.py`, `run_experiments.py`, `make_figures.py`, `reproduce_main.sh` |
-| `metadata` | incident registry, hard-negative registries, verified protocol map, group splits |
-| `data` | raw API cache (`raw_archive/`, 203 MB → 3.2 GB) and decoded trajectories (`processed/`) |
-| `results/tables` | every result table, run manifest and provenance of each trajectory |
-| `paper` | LNCS manuscript, sections and figures |
+| `src/normalize` | Event schema and semantic decoder |
+| `src/trajectories` | Bounded value-flow trajectory builder |
+| `src/features` | Prefix-safe features (actions 1..k only) |
+| `src/models` | Baselines, GRU sequence model, CAGI-ED scorer |
+| `src/evaluation` | Leave-one-incident-out, calibration, bootstrap |
+| `src/synth` | Synthetic benchmark generator (reported separately) |
+| `scripts` | Crawling, experiments, figures, one-command reproduction |
+| `metadata` | Incident and hard-negative registries, protocol map, splits |
+| `data` | Raw API archive and processed trajectories |
+| `results/tables` | Result tables, run manifest, per-trajectory provenance |
 
-## Data
+## Data and ethics
 
-15 publicly documented incidents (2021–2025) on Ethereum, BNB Smart Chain and
-Arbitrum, labeled by the authors from on-chain evidence and public reports
-(CertiK, SlowMist, PeckShield, Chainalysis, …). Hard negatives are other users
-of the same bridges, DEXs and mixers within ±7 days, expanded exactly like the
-incidents. Part of the BSC data could not be collected on the free NodeReal
-quota; those trajectories are excluded and listed in
-`results/tables/dataset_provenance.json`.
+Incidents are publicly documented exploits, labeled from on-chain evidence and
+public reports (CertiK, SlowMist, PeckShield, Chainalysis, …). Hard negatives
+are other users of the same bridges, DEXs and mixers within ±7 days.
+Trajectories that could not be fully collected are excluded and listed in
+`results/tables/dataset_provenance.json`. Only public data is used, no
+real-world identities are inferred, and alerts are intended for human review.
 
-Only public data is used; no real-world identities are inferred. Alerts are
-meant for human review, not automatic enforcement.
+## License
 
-License: MIT.
+[MIT](LICENSE)
