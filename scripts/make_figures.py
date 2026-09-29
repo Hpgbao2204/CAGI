@@ -287,7 +287,13 @@ def fig5():
                 label=f"{mth}: ECE {cal.loc[mth, 'ece']:.3f}, Brier {cal.loc[mth, 'brier']:.3f}")
     ax.set_xlabel("mean predicted probability (10 bins)")
     ax.set_ylabel("observed positive fraction")
-    ax.legend(loc="upper left")
+    ax.set_xlim(-0.02, 1.02)
+    ax.set_ylim(-0.02, 1.05)
+    ax.set_xticks(np.linspace(0, 1, 6))
+    ax.set_yticks(np.linspace(0, 1, 6))
+    # Legend nam NGOAI vung ve (phia tren) de khong de len duong du lieu:
+    # isotonic/platt cham 1.0 o giua truc nen khong con goc trong nao.
+    fig.legend(loc="outside upper center", ncols=1, handlelength=2.2, borderaxespad=0.1)
     save(fig, "fig5b")
 
     st = csv("stress_mimicry.csv")
