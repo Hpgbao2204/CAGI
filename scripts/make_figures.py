@@ -57,6 +57,12 @@ def save(fig, name):
     print("  ->", name)
 
 
+def top_legend(fig, ncols=1, **kw):
+    """Legend NGOAI vung ve (phia tren truc) de khong bao gio de len duong/band du lieu."""
+    kw = {"handlelength": 2.2, "columnspacing": 1.0, **kw}
+    fig.legend(loc="outside upper center", ncols=ncols, borderaxespad=0.1, **kw)
+
+
 def load(name):
     with open(EXP / f"{name}.pkl", "rb") as f:
         return pickle.load(f)
@@ -155,19 +161,19 @@ def fig4():
     hzp = csv("rq2_time_horizons_paired.csv").set_index("horizon_min")
     fig, ax = plt.subplots(figsize=(W1, H1))
     x = np.arange(len(hz))
-    for xi, h in zip(x, hz.horizon_min):
-        if hzp.loc[h, "p_value"] < 0.05:
-            ax.text(xi, 0.97, "*", ha="center", va="top", fontsize=10, color=INK)
     for m in ("M1", "B3p"):
         ax.fill_between(x, hz[f"{m}_ci_low"], hz[f"{m}_ci_high"], color=C[m], alpha=0.12, lw=0)
         ax.plot(x, hz[f"{m}_pr_auc"], color=C[m], ls=LS[m], marker=MARK[m], label=LABEL[m])
     ax.plot(x, hz.pos_rate, color=NEG, ls=":", lw=1, label="prevalence")
     lab = {1: "1m", 5: "5m", 15: "15m", 30: "30m", 60: "1h", 180: "3h", 720: "12h", 1440: "24h"}
-    ax.set_xticks(x, [lab.get(v, str(v)) for v in hz.horizon_min])
+    # dau * (p<0.05) gan vao nhan truc x thay vi ve trong vung du lieu
+    ax.set_xticks(x, [lab.get(v, str(v)) + ("*" if hzp.loc[v, "p_value"] < 0.05 else "")
+                      for v in hz.horizon_min])
     ax.set_xlabel("time since first action (* $p<0.05$)")
     ax.set_ylabel("PR-AUC (95% CI)")
     ax.set_ylim(0, 1.02)
-    ax.legend(loc="lower right")
+    ax.set_yticks(np.linspace(0, 1, 6))
+    top_legend(fig, ncols=3, handlelength=1.6, columnspacing=0.8)
     save(fig, "fig4a")
 
     online = load("online_scores")
@@ -187,7 +193,7 @@ def fig4():
     ax.set_xlabel("prefix position $k/n$ (%)")
     ax.set_ylabel("calibrated score $\\hat p_k$")
     ax.set_ylim(0, 1.02)
-    ax.legend(loc="center right")
+    top_legend(fig)
     save(fig, "fig4b")
 
 
@@ -201,15 +207,18 @@ def fig4_alerts():
             label="alert before endpoint")
     ax.plot(al.false_alert_rate * 100, al.pos_alerted_any / al.n_pos * 100, color=C["M1"], ls="--", marker="s", ms=3,
             label="alert at any time")
-    for th in (0.3, 0.5, 0.7, 0.9):
+    # nhan theta dat thanh cot o vung trong ben phai-duoi cac duong, noi ve diem bang
+    # duong dan manh -> khong chong len nhau va khong de len duong du lieu
+    for th, xy_text in ((0.3, (6, 43)), (0.5, (15, 19)), (0.7, (15, 12)), (0.9, (15, 5))):
         r = al[np.isclose(al.theta, th)]
         if len(r):
             ax.annotate(f"$\\theta$={th}", (r.false_alert_rate.iloc[0] * 100, r.detected_before.iloc[0] / r.n_endpoint.iloc[0] * 100),
-                        textcoords="offset points", xytext=(4, -9), fontsize=6, color=INK2)
+                        xytext=xy_text, ha="left", va="center", fontsize=6, color=INK2,
+                        arrowprops=dict(arrowstyle="-", color=INK2, lw=0.4, shrinkA=1, shrinkB=2))
     ax.set_xlabel("false-alert rate (% negatives)")
     ax.set_ylabel("incidents alerted (%)")
     ax.set_ylim(0, 102)
-    ax.legend(loc="lower right")
+    top_legend(fig, ncols=2)
     save(fig, "fig4c")
 
     # case study: incident co lead time duong lon nhat trong so incident co >=20 action
@@ -238,7 +247,7 @@ def fig4_alerts():
     ax.set_xlabel("minutes since first action (log)")
     ax.set_ylabel("score")
     ax.set_ylim(0, 1.12)
-    ax.legend(loc="lower left")
+    top_legend(fig, ncols=2)
     save(fig, "fig4d")
 
 
@@ -293,7 +302,7 @@ def fig5():
     ax.set_yticks(np.linspace(0, 1, 6))
     # Legend nam NGOAI vung ve (phia tren) de khong de len duong du lieu:
     # isotonic/platt cham 1.0 o giua truc nen khong con goc trong nao.
-    fig.legend(loc="outside upper center", ncols=1, handlelength=2.2, borderaxespad=0.1)
+    top_legend(fig)
     save(fig, "fig5b")
 
     st = csv("stress_mimicry.csv")
